@@ -14,8 +14,12 @@ main: $(objs)
 $(objdir)/%.o: %.c
 	cc -std=c99 -DDEBUG $(WARNS) $(OPTIONS) -c $< -o $@
 
+$(objdir):
+	mkdir $(objdir)
+
 run: main
 	./main ../testProject
 
-
+clean: 
+	rm $(objs)
 
