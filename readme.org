@@ -7,29 +7,29 @@
   with "~///~~" like:
   
 #+BEGIN_SRC c
-  ///~"This function does not do anything!"
-  void test(char* text, int n){
+///~"This function does not do anything!"
+void test(char* text, int n){
 #+END_SRC
   
 And parse them into a data structure like this:
    
 #+BEGIN_SRC json
-  {
-	  "Project" : "Project name from cmd"
-	  "Modules" : [{
-		  "Module" : "Test Module1",
-		  "Functions" : [{
-			  "FunctionName" : "test"
-			  "Params" : [
-				  {"name": "text", "type" : "char*"}, 
-				  {"name": "n", "type" : "int"}
-			  ],
-			  "Return" : "void",
-			  "Description" : "This function does not do anything!",
-			  "File" : "test.c"
-		  }]
-	  }]
-  }
+{
+	"Project" : "Project name from cmd",
+	"Modules" : [{
+		"Module" : "Test Module1",
+		"Functions" : [{
+			"FunctionName" : "test",
+			"Params" : [
+				{"name": "text", "type" : "char*"}, 
+				{"name": "n", "type" : "int"}
+			],
+			"Return" : "void",
+			"Description" : "This function does not do anything!",
+			"File" : "test.c"
+		}]
+	}]
+}
 #+END_SRC
 
 Which should be then rendered in various formats like debug, ascii,
@@ -40,11 +40,11 @@ markdown, html, and more.
    function to adjust them when needed.
 
 #+BEGIN_SRC c
-  //:"This function does not do anything!"
-  //&realFunctionName    <-    this overrides read params with the provided ones
-  //@1 string text         <-    this overrides read params with the provided ones
-  //#int                 <-    this overrides read return value
-  //$clojure             <-    this overrides the language target
-  void test(char* text, int n){
+//:"This function does not do anything!"
+//&realFunctionName    <-    this overrides read params with the provided ones
+//@1 string text       <-    this overrides read params with the provided ones
+//#int                 <-    this overrides read return value
+//$clojure             <-    this overrides the language target
+void test(char* text, int n){
 #+END_SRC
 
