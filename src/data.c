@@ -63,18 +63,15 @@ void readfile(Project* p, char* path){
 				char* fun_desc = strdup(l+4); //+4 removes the prefix
 				l = readline(f);
 
-				//Get return type
-				int step = charsUntil(l, 2, ' ', '\t');
-				char* fun_ret = trimndup(l, step);
-				l += step + 1;
-
-				//Get function name
-				step = charsUntil(l, 3, ' ', '\t', '(');
-				char* fun_name = trimndup(l, step);
-				l += step + 1;
-
+				//Get return and name
+				int step = charsUntil(l, 1, '(');
+				char* returnAndName = trimndup(l, step);
+				int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
+				char* fun_ret = trimndup(returnAndName, sep);
+				char* fun_name = trimdup(returnAndName + sep);
 				Function* fun = function_new(fun_name, fun_desc, fun_ret);
 				module_add_function(m, fun);
+				l += step + 1;
 
 				//Get arguments
 				int i=0;
