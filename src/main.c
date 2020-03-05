@@ -22,5 +22,6 @@ int main(int argc, char** argv){
 
 	Project* p = project_new("test", argv[1]);
 	render_project_debug(p);
+	render_project_org(p, "test_output.org");
 	return 0;
 }

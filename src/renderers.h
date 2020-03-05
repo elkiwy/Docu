@@ -1,10 +1,10 @@
 #pragma once
 #include <stdio.h>
+#include <stdbool.h>
 #include "data.h"
 
-void render_argument_debug(Argument* a);
-void render_function_debug(Function* f);
 void render_project_debug(Project* p);
+void render_project_org(Project* p, const char* path);
 
 
 

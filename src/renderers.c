@@ -1,7 +1,7 @@
 #include "renderers.h"
 
 ////////////////////////////////////////////////////////////////////////
-// Renderes
+// Debug
 
 
 void render_argument_debug(Argument* a){
@@ -32,3 +32,45 @@ void render_project_debug(Project* p){
 		render_module_debug(p->modules[i]);
 	}
 }
+
+////////////////////////////////////////////////////////////////////////
+// Org
+
+
+void render_argument_org(FILE* f, Argument* a){
+	fprintf(f, "     - *%s* => /%s/\n", a->name, a->type);
+}
+
+void render_function_org(FILE* f, Function* fun){
+	fprintf(f, "*** %s => %s\n", fun->name, fun->returnType);
+	fprintf(f, "    %s\n", fun->description);
+	fputs("    Arguments:\n", f);
+	for (int i=0; i<fun->args_count; ++i){
+		render_argument_org(f, fun->args[i]);
+	}
+}
+
+void render_module_org(FILE* f, Module* m){
+	fprintf(f, "** Module: %s\n", m->name);
+	for (int i=0; i<m->functions_count; ++i){
+		render_function_org(f, m->functions[i]);
+	}
+}
+
+
+void render_project_org(Project* p, const char* path){
+	//Create the file
+	FILE* f = fopen(path, "w");
+	if (f==NULL){printf("Couln't open file %s for org export\n", path);return;}
+
+	fprintf(f, "* %s API Reference\n", p->name);
+
+	for (int i=0; i<p->modules_count; ++i){
+		render_module_org(f, p->modules[i]);
+	}
+
+	//Close file
+	printf("Exported documentation to %s\n", path);
+	fclose(f);
+}
+
