@@ -3,10 +3,19 @@
 WARNS = -Wpedantic -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion
 OPTIONS = -g -Og -fsanitize=address -fsanitize=undefined
 
-main: main.c
-	cc -std=c99 -DDEBUG $(WARNS) $(OPTIONS) main.c -o main
+objdir = obj
+srcs = $(wildcard *.c)
+objs = $(patsubst %.c,$(objdir)/%.o,$(srcs))
 
-run:  
-	cc -std=c99 -DDEBUG $(WARNS) $(OPTIONS) main.c -o main
+
+main: $(objs)
+	cc -std=c99 -DDEBUG $(WARNS) $(OPTIONS) -o $@ $^
+
+$(objdir)/%.o: %.c
+	cc -std=c99 -DDEBUG $(WARNS) $(OPTIONS) -c $< -o $@
+
+run: main
 	./main ../testProject
+
+
 

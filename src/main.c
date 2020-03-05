@@ -6,73 +6,13 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-#define MAX_FILES 128
-#define MAX_ARGS 16
-#define MAX_LINE_LENGTH 256
-
-typedef struct Project{
-	char* name;
-	char* root;
-	char* files[MAX_FILES];
-	int files_count;
-} Project;
-
-typedef struct Argument{
-	char* name;
-	char* type;
-} Argument;
-
-typedef struct Function{
-	char* name;
-	char* description;
-	char* returnType;
-    Argument* args[MAX_ARGS];
-    int args_count;
-} Function;
+#include "utils.h"
+#include "renderers.h"
+#include "data.h"
 
 
 
-char* formatString(char* format, int n, ...){
-	va_list args;
-	va_list args_copy;
-	char* strings[n];
-	int size = 0;
-	va_start(args, n);
-	va_copy(args_copy, args);
-	for (int i=0; i<n; ++i){
-		strings[i] = va_arg(args, char*);
-		size += strlen(strings[i]);
-	}
-	size += strlen(format) + 1;
-	char* buff = malloc(sizeof(char) * size);
-	vsprintf(buff, format, args_copy);
-	va_end(args);
-	return buff;
-}
 
-
-
-////////////////////////////////////////////////////////////////////////
-// Renderes
-
-
-void render_argument_debug(Argument* a){
-	printf("    arg type: \"%s\", arg name: \"%s\"\n", a->type, a->name);
-}
-
-void render_function_debug(Function* f){
-	printf("  function name: \"%s\", return: \"%s\"\n", f->name, f->returnType);
-	for (int i=0; i<f->args_count; ++i){
-		render_argument_debug(f->args[i]);
-	}
-}
-
-void render_project_debug(Project* p){
-	printf("Rendering project %s\n", p->name);	
-	for (int i=0; i<p->files_count; ++i){
-		printf("file: %s\n", p->files[i]);
-	}
-}
 
 
 

@@ -15,20 +15,20 @@ And parse them into a data structure like this:
    
 #+BEGIN_SRC json
 {
-  "Project" : "Project name from cmd",
-  "Modules" : [{
-    "Module" : "Test Module1",
-    "Functions" : [{
-      "FunctionName" : "test",
-      "Params" : [
-        {"name": "text", "type" : "char*"}, 
-        {"name": "n", "type" : "int"}
-      ],
-      "Return" : "void",
-      "Description" : "This function does not do anything!",
-      "File" : "test.c"
+    "Project" : "Project name from cmd",
+    "Modules" : [{
+        "Module" : "Test Module1",
+        "Functions" : [{
+            "FunctionName" : "test",
+            "Params" : [
+                {"name": "text", "type" : "char*"}, 
+                {"name": "n", "type" : "int"}
+            ],
+            "Return" : "void",
+            "Description" : "This function does not do anything!",
+            "File" : "test.c"
+        }]
     }]
-  }]
 }
 #+END_SRC
 
