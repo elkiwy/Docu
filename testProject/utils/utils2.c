@@ -1,4 +1,5 @@
 
+///=ExampleModule
 
 ///~This function is broken
 void testFunction_inUtils2(void** n, const char* text){

@@ -31,7 +31,6 @@ void getFiles(Project* proj, const char* folder){
 
 
 
-
 Function* function_new(char* name, char* desc, char* ret){
 	Function* f = malloc(sizeof(Function));
 	f->args_count = 0;
@@ -57,8 +56,13 @@ void readfile(Project* p, char* path){
 		char* l = readline(f);
 		Module* m = project_get_module(p, "default");
 		while(l!=NULL){
-			//Trim the string
-			if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='~'){
+			//If is a module name
+			if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='='){
+			    //Update the current module
+				m = project_get_module(p, l+4);
+
+			//If is a function description
+			}else if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='~'){
 				//Parse the docstring
 				char* fun_desc = strdup(l+4); //+4 removes the prefix
 
@@ -162,13 +166,17 @@ void project_add_module(Project* p, Module* m){
 	p->modules_count++;
 }
 
+
 Module* project_get_module(Project* p, char* name){
 	for (int i=0; i<p->modules_count; ++i){
 		if(strcmp(p->modules[i]->name, name) == 0){
 			return p->modules[i];
 		}
 	}
-	return NULL;
+
+	Module* newModule = module_new(name);
+	project_add_module(p, newModule);
+	return newModule;
 }
 
 void module_add_function(Module* m, Function* f){
