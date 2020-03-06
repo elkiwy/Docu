@@ -1,5 +1,12 @@
 * Todo
-  - everything
+  - Languages
+	- C
+	- PHP
+	- Clojure
+  - Renderers
+    - ASCII renderer
+    - HTML renderer
+    - Custom renderer
   
 	
 * Sketches
@@ -40,11 +47,27 @@ markdown, html, and more.
    function to adjust them when needed.
 
 #+BEGIN_SRC c
-//:"This function does not do anything!"
-//&realFunctionName    <-    this overrides read params with the provided ones
-//@1 string text       <-    this overrides read params with the provided ones
-//#int                 <-    this overrides read return value
-//$clojure             <-    this overrides the language target
+///:"This function does not do anything!"
+///&realFunctionName    <-    this overrides read params with the provided ones
+///@1 string text       <-    this overrides read params with the provided ones
+///#int                 <-    this overrides read return value
+///$clojure             <-    this overrides the language target
 void test(char* text, int n){
 #+END_SRC
+
+
+** Modules
+   Modules can be specified by the docstring ~"///=ModuleName"~ at the
+   top of each file. If no module is specified every function read
+   will be inserted into a special "default" module.
+
+#+BEGIN_SRC c
+///:ModuleName
+
+...
+
+///~Function description
+void test(char* text, int n){
+#+END_SRC
+
 
