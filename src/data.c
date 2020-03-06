@@ -61,7 +61,13 @@ void readfile(Project* p, char* path){
 			if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='~'){
 				//Parse the docstring
 				char* fun_desc = strdup(l+4); //+4 removes the prefix
+
+				//Readline until you find something
 				l = readline(f);
+				while(l!=NULL && strlen(trim(l))==0){
+					printf("Skipping \"%s\"\n", l);
+					l = readline(f);
+				}
 
 				//Get return and name
 				int step = charsUntil(l, 1, '(');
