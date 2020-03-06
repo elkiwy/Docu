@@ -17,6 +17,35 @@ void testFunction(int n, char* text){
 void testFunction(int n, char* text){
 }
 
+
+     ///~this function has whitespaces before the docstring
+void testFunctionWhitespaces(int n){
+}
+
+
+///~No arguments
+void testFunctionNoArgument(){
+}
+
+///~One arguments
+void testFunctionSingleArgument(int n){
+}
+
+  
+  
+///~This docstring shouldn't work
+asdjaklsdjasldjsal
+
+
+///~This docstring shouldn't work
+void asdjaklsdjasldjsal(
+
+
+
+
+
+
+
 int main(){
 	testFunction(1, "ciao");
 	return 0;

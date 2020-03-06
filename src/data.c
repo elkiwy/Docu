@@ -65,19 +65,32 @@ void readfile(Project* p, char* path){
 				//Readline until you find something
 				l = readline(f);
 				while(l!=NULL && strlen(trim(l))==0){
-					printf("Skipping \"%s\"\n", l);
-					l = readline(f);
-				}
+					l = readline(f);}
+				char* fullLine = l;
 
 				//Get return and name
 				int step = charsUntil(l, 1, '(');
+				if (step==0){
+					printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
+					continue;
+				}
+
 				char* returnAndName = trimndup(l, step);
 				int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
 				char* fun_ret = trimndup(returnAndName, sep);
 				char* fun_name = trimdup(returnAndName + sep);
+				l += step + 1;
+
+				//Check if arguments are properly declared
+				int closingArgStep = charsUntil(l, 1, ')');
+				if (closingArgStep==0 && ((strlen(l)>0 && l[0] != ')') || strlen(l)==0)) {
+					printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
+					continue;
+				}
+
+				//Function declaration should be valid here, so create the object
 				Function* fun = function_new(fun_name, fun_desc, fun_ret);
 				module_add_function(m, fun);
-				l += step + 1;
 
 				//Get arguments
 				int i=0;
