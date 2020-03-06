@@ -47,85 +47,107 @@ Argument* argument_new(char* type, char* name){
 	return a;
 }
 
+
+bool checkSupportedExtension(const char* ext){
+	const char* supported[] = {".c", ".h"};
+	int size = sizeof(supported) / sizeof(supported[0]);
+	for (int i=0; i<size; ++i){
+		if (strcasecmp(ext, supported[i])==0){
+			return true;
+		}
+	}
+	return false;
+}
+
+
 void readfile(Project* p, char* path){
+	//Check if the file extension is one of the supported ones
+	char* fileExt = path + charsUntilLast(path, 1, '.');
+	if(!checkSupportedExtension(fileExt)){
+		printf("Skipping %s, extension not supported\n", path);
+		return;
+	}
+
+	//Try to open the file
 	FILE* f = fopen(path, "r");
 	if (f == NULL){
 		printf("Failed to open %s for read\n", path);fflush(stdout);
 		return;
-	}else{
-		char* l = readline(f);
-		Module* m = project_get_module(p, "default");
-		while(l!=NULL){
-			//If is a module name
-			if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='='){
-			    //Update the current module
-				m = project_get_module(p, l+4);
+	}
 
-			//If is a function description
-			}else if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='~'){
-				//Parse the docstring
-				char* fun_desc = strdup(l+4); //+4 removes the prefix
+	//Read it line by line
+	char* l = readline(f);
+	Module* m = project_get_module(p, "default");
+	while(l!=NULL){
+		//If is a module name
+		if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='='){
+			//Update the current module
+			m = project_get_module(p, l+4);
 
-				//Readline until you find something
-				l = readline(f);
-				while(l!=NULL && strlen(trim(l))==0){
-					l = readline(f);}
-				char* fullLine = l;
+		//If is a function description
+		}else if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='~'){
+			//Parse the docstring
+			char* fun_desc = strdup(l+4); //+4 removes the prefix
 
-				//Get return and name
-				int step = charsUntil(l, 1, '(');
-				if (step==0){
-					printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
-					continue;
-				}
+			//Readline until you find something
+			l = readline(f);
+			while(l!=NULL && strlen(trim(l))==0){
+				l = readline(f);}
+			char* fullLine = l;
 
-				char* returnAndName = trimndup(l, step);
-				int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
-				char* fun_ret = trimndup(returnAndName, sep);
-				char* fun_name = trimdup(returnAndName + sep);
-				l += step + 1;
-
-				//Check if arguments are properly declared
-				int closingArgStep = charsUntil(l, 1, ')');
-				if (closingArgStep==0 && ((strlen(l)>0 && l[0] != ')') || strlen(l)==0)) {
-					printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
-					continue;
-				}
-
-				//Function declaration should be valid here, so create the object
-				Function* fun = function_new(fun_name, fun_desc, fun_ret);
-				module_add_function(m, fun);
-
-				//Get arguments
-				int i=0;
-				int size=strlen(l);
-				while(i<size && l[i] != ')'){
-					int step = charsUntil(l, 2, ',', ')');
-					char* argString = trimndup(l, step);
-
-					//Get argument type
-					int sep = charsUntilLast(argString, 2, ' ', '\t');
-					char* a_type = trimndup(l, sep);
-
-					//Get argument name
-					argString += sep;
-					char* a_name = trimdup(argString);
-
-					//Add the argument to the function
-					Argument* a = argument_new(a_type, a_name);
-					function_add_argument(fun, a);
-
-					if (l[step]==')') break;
-					l += step + 1;
-					i = 0;
-					size -= step;
-				}
-
-
+			//Get return and name
+			int step = charsUntil(l, 1, '(');
+			if (step==0){
+				printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
+				continue;
 			}
 
-			l = readline(f);
+			char* returnAndName = trimndup(l, step);
+			int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
+			char* fun_ret = trimndup(returnAndName, sep);
+			char* fun_name = trimdup(returnAndName + sep);
+			l += step + 1;
+
+			//Check if arguments are properly declared
+			int closingArgStep = charsUntil(l, 1, ')');
+			if (closingArgStep==0 && ((strlen(l)>0 && l[0] != ')') || strlen(l)==0)) {
+				printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
+				continue;
+			}
+
+			//Function declaration should be valid here, so create the object
+			Function* fun = function_new(fun_name, fun_desc, fun_ret);
+			module_add_function(m, fun);
+
+			//Get arguments
+			int i=0;
+			int size=strlen(l);
+			while(i<size && l[i] != ')'){
+				int step = charsUntil(l, 2, ',', ')');
+				char* argString = trimndup(l, step);
+
+				//Get argument type
+				int sep = charsUntilLast(argString, 2, ' ', '\t');
+				char* a_type = trimndup(l, sep);
+
+				//Get argument name
+				argString += sep;
+				char* a_name = trimdup(argString);
+
+				//Add the argument to the function
+				Argument* a = argument_new(a_type, a_name);
+				function_add_argument(fun, a);
+
+				if (l[step]==')') break;
+				l += step + 1;
+				i = 0;
+				size -= step;
+			}
+
+
 		}
+
+		l = readline(f);
 	}
 }
 
