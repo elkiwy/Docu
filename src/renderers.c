@@ -9,11 +9,12 @@ void render_argument_debug(Argument* a){
 }
 
 void render_function_debug(Function* f){
-	printf("\n    function name: \"%s\", return: \"%s\"\n", f->name, f->returnType);
+	printf("    function name: \"%s\", return: \"%s\"\n", f->name, f->returnType);
 	printf("    =>%s\n", f->description);
 	for (int i=0; i<f->args_count; ++i){
 		render_argument_debug(f->args[i]);
 	}
+	printf("\n");
 }
 
 void render_module_debug(Module* m){
