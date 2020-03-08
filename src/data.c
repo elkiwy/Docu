@@ -57,12 +57,41 @@ char* nextUsefulLine(FILE* f){
 
 
 void parse_docstring_c(Module* m, FILE* f, char* l){
+	char* override_name   = NULL;
+	char* override_return = NULL;
+	char* override_args[MAX_ARGS];
+	for (int i=0; i<MAX_ARGS; ++i){override_args[i] = NULL;}
+
 	//Parse the docstring
 	char* fun_desc = strdup(l+4); //+4 removes the prefix
-	l = nextUsefulLine(f);
-	char* debug_fullLine = l;
+	l = nextUsefulLine(f, lineCount);
+	while(l!=NULL && strncmp(l, "///", 3)==0){
+		//Override name
+		if (strncmp(l, "///&", 4)==0){
+			override_name = strdup(l+4);	
+			
+		//Override return
+		}else if (strncmp(l, "///#", 4)==0){
+			override_return = strdup(l+4);	
+
+		//Override Args
+		}else if (strncmp(l, "///@", 4)==0){
+			//Convert one digit char into a number
+			if (l[4]<48 || l[4]>57){
+				printf("[!!!] Invalid argument overriding docstirng: \"%s\"", l);
+			}else{
+				int index = (int)l[4] - 48;
+				override_args[index-1] = strdup(l+5);
+			}
+		//Unknown docstring
+		}else{
+			printf("[!] Unknown docstring : \"%s\"", l);
+		}
+		l = nextUsefulLine(f, lineCount);
+	}
 
 	//Get return and name
+	char* debug_fullLine = l;
 	int step = charsUntil(l, 1, '(');
 	if (step==0){
 		printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, debug_fullLine);fflush(stdout);
@@ -82,33 +111,51 @@ void parse_docstring_c(Module* m, FILE* f, char* l){
 	}
 
 	//Function declaration should be valid here, so create the object
+	if (override_name!=NULL)fun_name = override_name;
+	if (override_return!=NULL)fun_ret = override_return;
 	Function* fun = function_new(fun_name, fun_desc, fun_ret);
 	module_add_function(m, fun);
 
 	//Get arguments
 	int i=0;
+	int argCount = 0;
 	int size=strlen(l);
 	while(i<size && l[i] != ')'){
 		int step = charsUntil(l, 2, ',', ')');
 		char* argString = trimndup(l, step);
+		//Add the argument to the function
+		if (override_args[argCount]!=NULL){
+			printf("====OLD '%s', NEW '%s'\n", argString, override_args[argCount]);fflush(stdout);
+			argString = override_args[i];	
+		}
 
 		//Get argument type
 		int sep = charsUntilLast(argString, 2, ' ', '\t');
-		char* a_type = trimndup(l, sep);
-
-		//Get argument name
-		argString += sep;
-		char* a_name = trimdup(argString);
-
-		//Add the argument to the function
+		char* a_type = trimndup(argString, sep);
+		char* a_name = trimdup(argString + sep);
 		Argument* a = argument_new(a_type, a_name);
 		function_add_argument(fun, a);
+		argCount++;
 
 		if (l[step]==')') break;
 		l += step + 1;
 		i = 0;
 		size -= step;
 	}
+
+	//Add extra argument from overriding
+	while(override_args[argCount]!=NULL){
+		//Get argument type
+		char* argString = override_args[argCount];
+		int sep = charsUntilLast(argString, 2, ' ', '\t');
+		char* a_type = trimndup(argString, sep);
+		char* a_name = trimdup(argString + sep);
+		Argument* a = argument_new(a_type, a_name);
+		function_add_argument(fun, a);
+		argCount++;
+	}
+
+
 }
 
 
