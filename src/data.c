@@ -1,6 +1,6 @@
 #include "data.h"
 
-
+///~Retrive all the files from a root directory and fill them into the project
 void getFiles(Project* proj, const char* folder){
 	DIR *dir;
     struct dirent* entry;
@@ -30,36 +30,18 @@ void getFiles(Project* proj, const char* folder){
 }
 
 
-
-Function* function_new(char* name, char* desc, char* ret){
-	Function* f = malloc(sizeof(Function));
-	f->args_count = 0;
-	f->name = name;
-	f->description = desc;
-	f->returnType = ret;
-	return f;
-}
-
-Argument* argument_new(char* type, char* name){
-	Argument* a = malloc(sizeof(Argument));
-	a->type = type;
-	a->name = name;
-	return a;
-}
-
-
+///~Checks if the current extension is one of the supported ones
 bool checkSupportedExtension(const char* ext){
 	const char* supported[] = {".c", ".h"};
 	int size = sizeof(supported) / sizeof(supported[0]);
 	for (int i=0; i<size; ++i){
-		if (strcasecmp(ext, supported[i])==0){
-			return true;
-		}
+		if (strcasecmp(ext, supported[i])==0) return true;
 	}
 	return false;
 }
 
 
+///~Reads a file and parse it creating all the documentation from his docstrings
 void readfile(Project* p, char* path){
 	//Check if the file extension is one of the supported ones
 	char* fileExt = path + charsUntilLast(path, 1, '.');
@@ -152,6 +134,28 @@ void readfile(Project* p, char* path){
 }
 
 
+
+
+
+///~Initialize a new argument
+Argument* argument_new(char* type, char* name){
+	Argument* a = malloc(sizeof(Argument));
+	a->type = type;
+	a->name = name;
+	return a;
+}
+
+///~Initialize a new function
+Function* function_new(char* name, char* desc, char* ret){
+	Function* f = malloc(sizeof(Function));
+	f->args_count = 0;
+	f->name = name;
+	f->description = desc;
+	f->returnType = ret;
+	return f;
+}
+
+///~Initialize a new module
 Module* module_new(char* name){
 	Module* m = malloc(sizeof(Module));
 	m->name = name;
@@ -159,7 +163,7 @@ Module* module_new(char* name){
 	return m;
 }
 
-
+///~Initialize a new Project
 Project* project_new(char* name, char* rootFolder){
 	//Initialize
 	Project* p = malloc(sizeof(Project));
@@ -179,7 +183,6 @@ Project* project_new(char* name, char* rootFolder){
 
 	return p;
 }
-
 
 
 
