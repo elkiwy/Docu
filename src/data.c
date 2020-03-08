@@ -80,12 +80,12 @@ void readfile(Project* p, char* path){
 	Module* m = project_get_module(p, "default");
 	while(l!=NULL){
 		//If is a module name
-		if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='='){
+		if(strlen(l)>3 && strncmp(l, "///=", 4)==0){
 			//Update the current module
 			m = project_get_module(p, l+4);
 
 		//If is a function description
-		}else if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='~'){
+		}else if(strlen(l)>3 && strncmp(l, "///~", 4)==0){
 			//Parse the docstring
 			char* fun_desc = strdup(l+4); //+4 removes the prefix
 
