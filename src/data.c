@@ -56,7 +56,57 @@ char* nextUsefulLine(FILE* f, int* lineCount){
 }
 
 
+char* get_function_return_c(char* line){
+	int step = charsUntil(line, 1, '(');
+	char* returnAndName = trimndup(line, step);
+	int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
+	char* ret = trimndup(returnAndName, sep);
+	free(returnAndName);
+	return ret;
+}
+
+
+char* get_function_name_c(char* line){
+	int step = charsUntil(line, 1, '(');
+	char* returnAndName = trimndup(line, step);
+	int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
+	char* name = trimdup(returnAndName + sep);
+	free(returnAndName);
+	return name;
+}
+
+char* get_function_args_c(char* line){
+	int step = charsUntil(line, 1, '(');
+	char* startArgs = line + step + 1;
+	return startArgs;
+}
+
+
+Argument* get_function_argument_c(char* line, int index){
+	int step = charsUntil(line, 1, '(');
+	char* args = line + step + 1;
+
+	int i = 0;
+	while(i<index){
+		step = charsUntil(args, 1, ',');
+		if (step==0) return NULL;
+		args += (step + 1);
+		i++;
+	}
+
+	step = charsUntil(args, 2, ',', ')');
+	char* arg = strndup(args, step); 
+	if (strlen(arg)==0)return NULL;
+	printf("=arg '%s'\n", arg);fflush(stdout);
+	int sep = charsUntilLast(arg, 2, ' ', '\t');
+	char* a_type = trimndup(arg, sep);
+	char* a_name = trimdup(arg + sep);
+	return argument_new(a_type, a_name);
+}
+
+
 void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filename){
+	//Prepare for information overriding
 	char* override_name   = NULL;
 	char* override_return = NULL;
 	char* override_args[MAX_ARGS];
@@ -90,27 +140,11 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 		l = nextUsefulLine(f, lineCount);
 	}
 
+
+
 	//Get return and name
-	char* debug_fullLine = l;
-	int step = charsUntil(l, 1, '(');
-	if (step==0){
-		printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, debug_fullLine);fflush(stdout);
-		return;
-	}
-	char* returnAndName = trimndup(l, step);
-	int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
-	char* fun_ret = trimndup(returnAndName, sep);
-	char* fun_name = trimdup(returnAndName + sep);
-	l += step + 1;
-
-	//Check if arguments are properly declared
-	int closingArgStep = charsUntil(l, 1, ')');
-	if (closingArgStep==0 && ((strlen(l)>0 && l[0] != ')') || strlen(l)==0)) {
-		printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, debug_fullLine);fflush(stdout);
-		return;
-	}
-
-	//Function declaration should be valid here, so create the object
+	char* fun_ret = get_function_return_c(l);
+	char* fun_name = get_function_name_c(l);
 	if (override_name!=NULL)fun_name = override_name;
 	if (override_return!=NULL)fun_ret = override_return;
 	Function* fun = function_new(fun_name, fun_desc, fun_ret);
@@ -119,43 +153,56 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 	module_add_function(m, fun);
 
 	//Get arguments
-	int i=0;
-	int argCount = 0;
-	int size=strlen(l);
-	while(i<size && l[i] != ')'){
-		int step = charsUntil(l, 2, ',', ')');
-		char* argString = trimndup(l, step);
-		//Add the argument to the function
-		if (override_args[argCount]!=NULL){
-			printf("====OLD '%s', NEW '%s'\n", argString, override_args[argCount]);fflush(stdout);
-			argString = override_args[i];	
-		}
-
-		//Get argument type
-		int sep = charsUntilLast(argString, 2, ' ', '\t');
-		char* a_type = trimndup(argString, sep);
-		char* a_name = trimdup(argString + sep);
-		Argument* a = argument_new(a_type, a_name);
+	int iii =0;
+	Argument* a = get_function_argument_c(l, iii);
+	while(a!=NULL){
 		function_add_argument(fun, a);
-		argCount++;
-
-		if (l[step]==')') break;
-		l += step + 1;
-		i = 0;
-		size -= step;
+		iii++;
+		a = get_function_argument_c(l, iii);
 	}
 
-	//Add extra argument from overriding
-	while(override_args[argCount]!=NULL){
-		//Get argument type
-		char* argString = override_args[argCount];
-		int sep = charsUntilLast(argString, 2, ' ', '\t');
-		char* a_type = trimndup(argString, sep);
-		char* a_name = trimdup(argString + sep);
-		Argument* a = argument_new(a_type, a_name);
-		function_add_argument(fun, a);
-		argCount++;
-	}
+
+
+
+	//char* fun_args = get_function_args_c(l);
+	//int i=0;
+	//int argCount = 0;
+	//int size=strlen(fun_args);
+	//printf("fun_args: %s\n", fun_args);fflush(stdout);
+	//while(i<size && l[i] != ')' && charsUntil(fun_args, 1, ')')>0){
+	//	int step = charsUntil(fun_args, 2, ',', ')');
+	//	char* argString = trimndup(fun_args, step);
+	//	//Add the argument to the function
+	//	if (override_args[argCount]!=NULL){
+	//		printf("====OLD '%s', NEW '%s'\n", argString, override_args[argCount]);fflush(stdout);
+	//		argString = override_args[i];	
+	//	}
+
+	//	//Get argument type
+	//	int sep = charsUntilLast(argString, 2, ' ', '\t');
+	//	char* a_type = trimndup(argString, sep);
+	//	char* a_name = trimdup(argString + sep);
+	//	Argument* a = argument_new(a_type, a_name);
+	//	function_add_argument(fun, a);
+	//	argCount++;
+
+	//	if (fun_args[step]==')') break;
+	//	fun_args += step + 1;
+	//	i = 0;
+	//	size -= step;
+	//}
+
+	////Add extra argument from overriding
+	//while(override_args[argCount]!=NULL){
+	//	//Get argument type
+	//	char* argString = override_args[argCount];
+	//	int sep = charsUntilLast(argString, 2, ' ', '\t');
+	//	char* a_type = trimndup(argString, sep);
+	//	char* a_name = trimdup(argString + sep);
+	//	Argument* a = argument_new(a_type, a_name);
+	//	function_add_argument(fun, a);
+	//	argCount++;
+	//}
 
 
 }
