@@ -17,4 +17,4 @@ char* trim(char* s);
 char* trimdup(char* s);
 char* trimndup(char* s, int n);
 
-char* readline(FILE* f);
+char* readline(FILE* f, int* lineCount);

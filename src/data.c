@@ -47,16 +47,16 @@ bool checkSupportedExtension(const char* ext){
 
 
 ///~Cycle all the next lines and skip all the blank ones
-char* nextUsefulLine(FILE* f){
-	char* l = readline(f);
+char* nextUsefulLine(FILE* f, int* lineCount){
+	char* l = readline(f, lineCount);
 	while(l!=NULL && strlen(trim(l))==0){
-		l = readline(f);
+		l = readline(f, lineCount);
 	}
 	return l;
 }
 
 
-void parse_docstring_c(Module* m, FILE* f, char* l){
+void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filename){
 	char* override_name   = NULL;
 	char* override_return = NULL;
 	char* override_args[MAX_ARGS];
@@ -114,6 +114,8 @@ void parse_docstring_c(Module* m, FILE* f, char* l){
 	if (override_name!=NULL)fun_name = override_name;
 	if (override_return!=NULL)fun_ret = override_return;
 	Function* fun = function_new(fun_name, fun_desc, fun_ret);
+	fun->line = *lineCount;
+	fun->file = strdup(filename);
 	module_add_function(m, fun);
 
 	//Get arguments
@@ -178,7 +180,9 @@ void readfile(Project* p, char* path){
 	}
 
 	//Read it line by line
-	char* l = readline(f);
+	int lineCount = 0;
+	char* filename = path;// + charsUntilLast(path, 1, '/');
+	char* l = readline(f, &lineCount);
 	Module* m = project_get_module(p, "default");
 	while(l!=NULL){
 		//If is a module name
@@ -189,14 +193,13 @@ void readfile(Project* p, char* path){
 		//If is a function description
 		}else if(strlen(l)>3 && strncmp(l, "///~", 4)==0){
 			if(strcmp(fileExt, ".c") || strcmp(fileExt, ".h")){
-				parse_docstring_c(m, f, l);
+				parse_docstring_c(m, f, l, &lineCount, filename);
 			}else{
 				//Other files
 			}
-
 		}
 
-		l = readline(f);
+		l = readline(f, &lineCount);
 	}
 }
 
@@ -219,6 +222,8 @@ Function* function_new(char* name, char* desc, char* ret){
 	f->name = name;
 	f->description = desc;
 	f->returnType = ret;
+	f->line = 0;
+	f->file = "";
 	return f;
 }
 

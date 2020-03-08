@@ -10,6 +10,7 @@ void render_argument_debug(Argument* a){
 
 void render_function_debug(Function* f){
 	printf("    function name: \"%s\", return: \"%s\"\n", f->name, f->returnType);
+	printf("    =>%s:%d\n", f->file, f->line);
 	printf("    =>%s\n", f->description);
 	for (int i=0; i<f->args_count; ++i){
 		render_argument_debug(f->args[i]);

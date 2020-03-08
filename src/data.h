@@ -26,6 +26,9 @@ typedef struct Function{
 	char* returnType;
     Argument* args[MAX_ARGS];
     int args_count;
+
+    int line;
+    char* file;
 } Function;
 
 typedef struct Module{

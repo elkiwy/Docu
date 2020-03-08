@@ -101,11 +101,12 @@ char* trim(char* s){
 
 
 
-char* readline(FILE* f){
+char* readline(FILE* f, int* lineCount){
 	//Read it
 	if (feof(f)){return NULL;}
 	char* s = malloc(sizeof(char)*(MAX_LINE_LENGTH));
 	if(fgets(s, MAX_LINE_LENGTH, f)==NULL){return NULL;}
+	if(lineCount!=NULL){*lineCount = ((*lineCount)+1);}
 
 	//Trim the result and remove the newline
 	return trim(s);
