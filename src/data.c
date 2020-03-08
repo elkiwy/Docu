@@ -46,6 +46,74 @@ bool checkSupportedExtension(const char* ext){
 }
 
 
+///~Cycle all the next lines and skip all the blank ones
+char* nextUsefulLine(FILE* f){
+	char* l = readline(f);
+	while(l!=NULL && strlen(trim(l))==0){
+		l = readline(f);
+	}
+	return l;
+}
+
+
+void parse_docstring_c(Module* m, FILE* f, char* l){
+	//Parse the docstring
+	char* fun_desc = strdup(l+4); //+4 removes the prefix
+	l = nextUsefulLine(f);
+	char* debug_fullLine = l;
+
+	//Get return and name
+	int step = charsUntil(l, 1, '(');
+	if (step==0){
+		printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, debug_fullLine);fflush(stdout);
+		return;
+	}
+	char* returnAndName = trimndup(l, step);
+	int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
+	char* fun_ret = trimndup(returnAndName, sep);
+	char* fun_name = trimdup(returnAndName + sep);
+	l += step + 1;
+
+	//Check if arguments are properly declared
+	int closingArgStep = charsUntil(l, 1, ')');
+	if (closingArgStep==0 && ((strlen(l)>0 && l[0] != ')') || strlen(l)==0)) {
+		printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, debug_fullLine);fflush(stdout);
+		return;
+	}
+
+	//Function declaration should be valid here, so create the object
+	Function* fun = function_new(fun_name, fun_desc, fun_ret);
+	module_add_function(m, fun);
+
+	//Get arguments
+	int i=0;
+	int size=strlen(l);
+	while(i<size && l[i] != ')'){
+		int step = charsUntil(l, 2, ',', ')');
+		char* argString = trimndup(l, step);
+
+		//Get argument type
+		int sep = charsUntilLast(argString, 2, ' ', '\t');
+		char* a_type = trimndup(l, sep);
+
+		//Get argument name
+		argString += sep;
+		char* a_name = trimdup(argString);
+
+		//Add the argument to the function
+		Argument* a = argument_new(a_type, a_name);
+		function_add_argument(fun, a);
+
+		if (l[step]==')') break;
+		l += step + 1;
+		i = 0;
+		size -= step;
+	}
+}
+
+
+
+
 ///~Reads a file and parse it creating all the documentation from his docstrings
 void readfile(Project* p, char* path){
 	//Check if the file extension is one of the supported ones
@@ -73,64 +141,11 @@ void readfile(Project* p, char* path){
 
 		//If is a function description
 		}else if(strlen(l)>3 && strncmp(l, "///~", 4)==0){
-			//Parse the docstring
-			char* fun_desc = strdup(l+4); //+4 removes the prefix
-
-			//Readline until you find something
-			l = readline(f);
-			while(l!=NULL && strlen(trim(l))==0){
-				l = readline(f);}
-			char* fullLine = l;
-
-			//Get return and name
-			int step = charsUntil(l, 1, '(');
-			if (step==0){
-				printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
-				continue;
+			if(strcmp(fileExt, ".c") || strcmp(fileExt, ".h")){
+				parse_docstring_c(m, f, l);
+			}else{
+				//Other files
 			}
-
-			char* returnAndName = trimndup(l, step);
-			int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
-			char* fun_ret = trimndup(returnAndName, sep);
-			char* fun_name = trimdup(returnAndName + sep);
-			l += step + 1;
-
-			//Check if arguments are properly declared
-			int closingArgStep = charsUntil(l, 1, ')');
-			if (closingArgStep==0 && ((strlen(l)>0 && l[0] != ')') || strlen(l)==0)) {
-				printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
-				continue;
-			}
-
-			//Function declaration should be valid here, so create the object
-			Function* fun = function_new(fun_name, fun_desc, fun_ret);
-			module_add_function(m, fun);
-
-			//Get arguments
-			int i=0;
-			int size=strlen(l);
-			while(i<size && l[i] != ')'){
-				int step = charsUntil(l, 2, ',', ')');
-				char* argString = trimndup(l, step);
-
-				//Get argument type
-				int sep = charsUntilLast(argString, 2, ' ', '\t');
-				char* a_type = trimndup(l, sep);
-
-				//Get argument name
-				argString += sep;
-				char* a_name = trimdup(argString);
-
-				//Add the argument to the function
-				Argument* a = argument_new(a_type, a_name);
-				function_add_argument(fun, a);
-
-				if (l[step]==')') break;
-				l += step + 1;
-				i = 0;
-				size -= step;
-			}
-
 
 		}
 
