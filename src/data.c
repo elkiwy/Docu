@@ -1,4 +1,9 @@
 #include "data.h"
+Argument* argument_new(char* type, char* name);
+Function* function_new(char* name, char* desc, char* ret);
+Module* module_new(char* name);
+Project* project_new(char* name, char* rootFolder);
+
 
 ///~Retrive all the files from a root directory and fill them into the project
 void getFiles(Project* proj, const char* folder){
