@@ -17,8 +17,12 @@ $(objdir)/%.o: %.c
 $(objdir):
 	mkdir $(objdir)
 
-run: main
-	./main ../testProject
+runhtml: main
+	./main -i ../testProject -m HTML -s ../teststyle.css
+runorg: main
+	./main -i ../testProject -m ORG
+rundebug: main
+	./main -i ../testProject -m DEBUG
 
 clean: 
 	rm $(objs)
