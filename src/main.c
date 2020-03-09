@@ -46,6 +46,8 @@ int main(int argc, char** argv){
 		render_project_debug(p);
 	}else if(strcmp(mode, "ORG")==0){
 		render_project_org(p, "test_output.org");
+	}else if(strcmp(mode, "HTML")==0){
+		render_project_html(p, "test_output.html", style);
 	}else{
 		fprintf(stderr, "Invalid mode '%s' must be one of: DEBUG, ORG, or HTML.\n", mode);
 		exit(EXIT_FAILURE);
