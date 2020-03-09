@@ -164,6 +164,7 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 	//Get return and name
 	char* fun_ret = get_function_return_c(l);
 	char* fun_name = get_function_name_c(l);
+	if (strlen(fun_ret)==0 || strlen(fun_name)==0){return;}
 	if (override_name!=NULL)fun_name = override_name;
 	if (override_return!=NULL)fun_ret = override_return;
 	Function* fun = function_new(fun_name, fun_desc, fun_ret);
