@@ -59,6 +59,37 @@ char* nextUsefulLine(FILE* f, int* lineCount){
 ///////////////////////////////////////////////////////////////////////////////////
 ///=Generic parsing
 
+///~Read all the docstring lines for information overriding
+char* parse_data_override(FILE* f, int* lineCount, char** name, char** ret, char* args[]){
+	char* l = nextUsefulLine(f, lineCount);
+	while(l!=NULL && strncmp(l, "///", 3)==0){
+		//Override name
+		if (strncmp(l, "///&", 4)==0){
+			*name = strdup(l+4);	
+			
+		//Override return
+		}else if (strncmp(l, "///#", 4)==0){
+			*ret = strdup(l+4);	
+
+		//Override Args
+		}else if (strncmp(l, "///@", 4)==0){
+			//Convert one digit char into a number
+			if (l[4]<48 || l[4]>57){
+				printf("[!!!] Invalid argument overriding docstirng: \"%s\"", l);
+			}else{
+				int index = (int)l[4] - 48;
+				args[index-1] = strdup(l+5);
+			}
+		//Unknown docstring
+		}else{
+			printf("[!] Unknown docstring : \"%s\"", l);
+		}
+		l = nextUsefulLine(f, lineCount);
+	}
+	return l;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 ///=C Code parsing
@@ -128,31 +159,7 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 
 	//Parse the docstring
 	char* fun_desc = strdup(l+4); //+4 removes the prefix
-	l = nextUsefulLine(f, lineCount);
-	while(l!=NULL && strncmp(l, "///", 3)==0){
-		//Override name
-		if (strncmp(l, "///&", 4)==0){
-			override_name = strdup(l+4);	
-			
-		//Override return
-		}else if (strncmp(l, "///#", 4)==0){
-			override_return = strdup(l+4);	
-
-		//Override Args
-		}else if (strncmp(l, "///@", 4)==0){
-			//Convert one digit char into a number
-			if (l[4]<48 || l[4]>57){
-				printf("[!!!] Invalid argument overriding docstirng: \"%s\"", l);
-			}else{
-				int index = (int)l[4] - 48;
-				override_args[index-1] = strdup(l+5);
-			}
-		//Unknown docstring
-		}else{
-			printf("[!] Unknown docstring : \"%s\"", l);
-		}
-		l = nextUsefulLine(f, lineCount);
-	}
+	l = parse_data_override(f, lineCount, &override_name, &override_return, override_args);
 
 	//Get return and name
 	char* fun_ret = get_function_return_c(l);
