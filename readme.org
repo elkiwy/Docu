@@ -49,8 +49,8 @@ markdown, html, and more.
    function to adjust them when needed.
 
 #+BEGIN_SRC c
-///:"This function does not do anything!"
-///&realFunctionName    <-    this overrides read params with the provided ones
+///~"This function does not do anything!"
+///&realFunctionName    <-    this overrides the function name
 ///@1 string text       <-    this overrides read params with the provided ones
 ///#int                 <-    this overrides read return value
 ///$clojure             <-    this overrides the language target

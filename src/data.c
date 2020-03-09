@@ -1,6 +1,11 @@
 #include "data.h"
+Argument* argument_new(char* type, char* name);
+Function* function_new(char* name, char* desc, char* ret);
+Module* module_new(char* name);
+Project* project_new(char* name, char* rootFolder);
 
 
+///~Retrive all the files from a root directory and fill them into the project
 void getFiles(Project* proj, const char* folder){
 	DIR *dir;
     struct dirent* entry;
@@ -30,36 +35,182 @@ void getFiles(Project* proj, const char* folder){
 }
 
 
-
-Function* function_new(char* name, char* desc, char* ret){
-	Function* f = malloc(sizeof(Function));
-	f->args_count = 0;
-	f->name = name;
-	f->description = desc;
-	f->returnType = ret;
-	return f;
-}
-
-Argument* argument_new(char* type, char* name){
-	Argument* a = malloc(sizeof(Argument));
-	a->type = type;
-	a->name = name;
-	return a;
-}
-
-
+///~Checks if the current extension is one of the supported ones
 bool checkSupportedExtension(const char* ext){
 	const char* supported[] = {".c", ".h"};
 	int size = sizeof(supported) / sizeof(supported[0]);
 	for (int i=0; i<size; ++i){
-		if (strcasecmp(ext, supported[i])==0){
-			return true;
-		}
+		if (strcasecmp(ext, supported[i])==0) return true;
 	}
 	return false;
 }
 
 
+///~Cycle all the next lines and skip all the blank ones
+char* nextUsefulLine(FILE* f, int* lineCount){
+	char* l = readline(f, lineCount);
+	while(l!=NULL && strlen(trim(l))==0){
+		l = readline(f, lineCount);
+	}
+	return l;
+}
+
+
+char* get_function_return_c(char* line){
+	int step = charsUntil(line, 1, '(');
+	char* returnAndName = trimndup(line, step);
+	int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
+	char* ret = trimndup(returnAndName, sep);
+	free(returnAndName);
+	return ret;
+}
+
+
+char* get_function_name_c(char* line){
+	int step = charsUntil(line, 1, '(');
+	char* returnAndName = trimndup(line, step);
+	int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
+	char* name = trimdup(returnAndName + sep);
+	free(returnAndName);
+	return name;
+}
+
+char* get_function_args_c(char* line){
+	int step = charsUntil(line, 1, '(');
+	char* startArgs = line + step + 1;
+	return startArgs;
+}
+
+
+Argument* get_function_argument_c(char* line, int index){
+	int step = charsUntil(line, 1, '(');
+	char* args = line + step + 1;
+
+	int i = 0;
+	while(i<index){
+		step = charsUntil(args, 1, ',');
+		if (step==0) return NULL;
+		args += (step + 1);
+		i++;
+	}
+
+	step = charsUntil(args, 2, ',', ')');
+	char* arg = strndup(args, step); 
+	if (strlen(arg)==0)return NULL;
+	printf("=arg '%s'\n", arg);fflush(stdout);
+	int sep = charsUntilLast(arg, 2, ' ', '\t');
+	char* a_type = trimndup(arg, sep);
+	char* a_name = trimdup(arg + sep);
+	return argument_new(a_type, a_name);
+}
+
+
+void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filename){
+	//Prepare for information overriding
+	char* override_name   = NULL;
+	char* override_return = NULL;
+	char* override_args[MAX_ARGS];
+	for (int i=0; i<MAX_ARGS; ++i){override_args[i] = NULL;}
+
+	//Parse the docstring
+	char* fun_desc = strdup(l+4); //+4 removes the prefix
+	l = nextUsefulLine(f, lineCount);
+	while(l!=NULL && strncmp(l, "///", 3)==0){
+		//Override name
+		if (strncmp(l, "///&", 4)==0){
+			override_name = strdup(l+4);	
+			
+		//Override return
+		}else if (strncmp(l, "///#", 4)==0){
+			override_return = strdup(l+4);	
+
+		//Override Args
+		}else if (strncmp(l, "///@", 4)==0){
+			//Convert one digit char into a number
+			if (l[4]<48 || l[4]>57){
+				printf("[!!!] Invalid argument overriding docstirng: \"%s\"", l);
+			}else{
+				int index = (int)l[4] - 48;
+				override_args[index-1] = strdup(l+5);
+			}
+		//Unknown docstring
+		}else{
+			printf("[!] Unknown docstring : \"%s\"", l);
+		}
+		l = nextUsefulLine(f, lineCount);
+	}
+
+
+
+	//Get return and name
+	char* fun_ret = get_function_return_c(l);
+	char* fun_name = get_function_name_c(l);
+	if (override_name!=NULL)fun_name = override_name;
+	if (override_return!=NULL)fun_ret = override_return;
+	Function* fun = function_new(fun_name, fun_desc, fun_ret);
+	fun->line = *lineCount;
+	fun->file = strdup(filename);
+	module_add_function(m, fun);
+
+	//Get arguments
+	int iii =0;
+	Argument* a = get_function_argument_c(l, iii);
+	while(a!=NULL){
+		function_add_argument(fun, a);
+		iii++;
+		a = get_function_argument_c(l, iii);
+	}
+
+
+
+
+	//char* fun_args = get_function_args_c(l);
+	//int i=0;
+	//int argCount = 0;
+	//int size=strlen(fun_args);
+	//printf("fun_args: %s\n", fun_args);fflush(stdout);
+	//while(i<size && l[i] != ')' && charsUntil(fun_args, 1, ')')>0){
+	//	int step = charsUntil(fun_args, 2, ',', ')');
+	//	char* argString = trimndup(fun_args, step);
+	//	//Add the argument to the function
+	//	if (override_args[argCount]!=NULL){
+	//		printf("====OLD '%s', NEW '%s'\n", argString, override_args[argCount]);fflush(stdout);
+	//		argString = override_args[i];	
+	//	}
+
+	//	//Get argument type
+	//	int sep = charsUntilLast(argString, 2, ' ', '\t');
+	//	char* a_type = trimndup(argString, sep);
+	//	char* a_name = trimdup(argString + sep);
+	//	Argument* a = argument_new(a_type, a_name);
+	//	function_add_argument(fun, a);
+	//	argCount++;
+
+	//	if (fun_args[step]==')') break;
+	//	fun_args += step + 1;
+	//	i = 0;
+	//	size -= step;
+	//}
+
+	////Add extra argument from overriding
+	//while(override_args[argCount]!=NULL){
+	//	//Get argument type
+	//	char* argString = override_args[argCount];
+	//	int sep = charsUntilLast(argString, 2, ' ', '\t');
+	//	char* a_type = trimndup(argString, sep);
+	//	char* a_name = trimdup(argString + sep);
+	//	Argument* a = argument_new(a_type, a_name);
+	//	function_add_argument(fun, a);
+	//	argCount++;
+	//}
+
+
+}
+
+
+
+
+///~Reads a file and parse it creating all the documentation from his docstrings
 void readfile(Project* p, char* path){
 	//Check if the file extension is one of the supported ones
 	char* fileExt = path + charsUntilLast(path, 1, '.');
@@ -76,82 +227,54 @@ void readfile(Project* p, char* path){
 	}
 
 	//Read it line by line
-	char* l = readline(f);
+	int lineCount = 0;
+	char* filename = path;// + charsUntilLast(path, 1, '/');
+	char* l = readline(f, &lineCount);
 	Module* m = project_get_module(p, "default");
 	while(l!=NULL){
 		//If is a module name
-		if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='='){
+		if(strlen(l)>3 && strncmp(l, "///=", 4)==0){
 			//Update the current module
 			m = project_get_module(p, l+4);
 
 		//If is a function description
-		}else if(strlen(l)>3 && l[0]=='/' && l[1]=='/' && l[2]=='/' && l[3]=='~'){
-			//Parse the docstring
-			char* fun_desc = strdup(l+4); //+4 removes the prefix
-
-			//Readline until you find something
-			l = readline(f);
-			while(l!=NULL && strlen(trim(l))==0){
-				l = readline(f);}
-			char* fullLine = l;
-
-			//Get return and name
-			int step = charsUntil(l, 1, '(');
-			if (step==0){
-				printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
-				continue;
+		}else if(strlen(l)>3 && strncmp(l, "///~", 4)==0){
+			if(strcmp(fileExt, ".c") || strcmp(fileExt, ".h")){
+				parse_docstring_c(m, f, l, &lineCount, filename);
+			}else{
+				//Other files
 			}
-
-			char* returnAndName = trimndup(l, step);
-			int sep = charsUntilLast(returnAndName, 2, ' ', '\t');
-			char* fun_ret = trimndup(returnAndName, sep);
-			char* fun_name = trimdup(returnAndName + sep);
-			l += step + 1;
-
-			//Check if arguments are properly declared
-			int closingArgStep = charsUntil(l, 1, ')');
-			if (closingArgStep==0 && ((strlen(l)>0 && l[0] != ')') || strlen(l)==0)) {
-				printf("[!!!] Skipping docstring \"%s\" and declaration \"%s\" because is not a valid.\n", fun_desc, fullLine);fflush(stdout);
-				continue;
-			}
-
-			//Function declaration should be valid here, so create the object
-			Function* fun = function_new(fun_name, fun_desc, fun_ret);
-			module_add_function(m, fun);
-
-			//Get arguments
-			int i=0;
-			int size=strlen(l);
-			while(i<size && l[i] != ')'){
-				int step = charsUntil(l, 2, ',', ')');
-				char* argString = trimndup(l, step);
-
-				//Get argument type
-				int sep = charsUntilLast(argString, 2, ' ', '\t');
-				char* a_type = trimndup(l, sep);
-
-				//Get argument name
-				argString += sep;
-				char* a_name = trimdup(argString);
-
-				//Add the argument to the function
-				Argument* a = argument_new(a_type, a_name);
-				function_add_argument(fun, a);
-
-				if (l[step]==')') break;
-				l += step + 1;
-				i = 0;
-				size -= step;
-			}
-
-
 		}
 
-		l = readline(f);
+		l = readline(f, &lineCount);
 	}
 }
 
 
+
+
+
+///~Initialize a new argument
+Argument* argument_new(char* type, char* name){
+	Argument* a = malloc(sizeof(Argument));
+	a->type = type;
+	a->name = name;
+	return a;
+}
+
+///~Initialize a new function
+Function* function_new(char* name, char* desc, char* ret){
+	Function* f = malloc(sizeof(Function));
+	f->args_count = 0;
+	f->name = name;
+	f->description = desc;
+	f->returnType = ret;
+	f->line = 0;
+	f->file = "";
+	return f;
+}
+
+///~Initialize a new module
 Module* module_new(char* name){
 	Module* m = malloc(sizeof(Module));
 	m->name = name;
@@ -159,7 +282,7 @@ Module* module_new(char* name){
 	return m;
 }
 
-
+///~Initialize a new Project
 Project* project_new(char* name, char* rootFolder){
 	//Initialize
 	Project* p = malloc(sizeof(Project));
@@ -179,7 +302,6 @@ Project* project_new(char* name, char* rootFolder){
 
 	return p;
 }
-
 
 
 
