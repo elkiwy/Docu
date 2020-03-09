@@ -131,7 +131,7 @@ Argument* get_function_argument_c(char* line, int index){
 	step = charsUntil(args, 2, ',', ')');
 	char* arg = strndup(args, step); 
 	if (strlen(arg)==0)return NULL;
-	printf("=arg '%s'\n", arg);fflush(stdout);
+	//printf("=arg '%s'\n", arg);fflush(stdout);
 	int sep = charsUntilLast(arg, 2, ' ', '\t');
 	char* a_type = trimndup(arg, sep);
 	char* a_name = trimdup(arg + sep);
@@ -173,7 +173,7 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 	module_add_function(m, fun);
 
 	//Get arguments
-	int ind =0;
+	int ind = 0;
 	Argument* a = get_function_argument_c(l, ind);
 	while(a!=NULL){
 		if (override_args[ind]!=NULL){ override_arg_c(a, override_args[ind]);}
