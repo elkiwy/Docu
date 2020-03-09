@@ -56,6 +56,10 @@ char* nextUsefulLine(FILE* f, int* lineCount){
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////
+///=Code parsing
+
+///~Get the function return type from C declaration
 char* get_function_return_c(char* line){
 	int step = charsUntil(line, 1, '(');
 	char* returnAndName = trimndup(line, step);
@@ -66,6 +70,7 @@ char* get_function_return_c(char* line){
 }
 
 
+///~Get the function name from C declaration
 char* get_function_name_c(char* line){
 	int step = charsUntil(line, 1, '(');
 	char* returnAndName = trimndup(line, step);
@@ -75,17 +80,11 @@ char* get_function_name_c(char* line){
 	return name;
 }
 
-char* get_function_args_c(char* line){
-	int step = charsUntil(line, 1, '(');
-	char* startArgs = line + step + 1;
-	return startArgs;
-}
 
-
+///~Get the function argument at index from C declaration
 Argument* get_function_argument_c(char* line, int index){
 	int step = charsUntil(line, 1, '(');
 	char* args = line + step + 1;
-
 	int i = 0;
 	while(i<index){
 		step = charsUntil(args, 1, ',');
@@ -105,6 +104,8 @@ Argument* get_function_argument_c(char* line, int index){
 }
 
 
+
+///~Parse a docstring from a C file
 void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filename){
 	//Prepare for information overriding
 	char* override_name   = NULL;
@@ -139,8 +140,6 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 		}
 		l = nextUsefulLine(f, lineCount);
 	}
-
-
 
 	//Get return and name
 	char* fun_ret = get_function_return_c(l);
