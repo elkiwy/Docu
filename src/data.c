@@ -57,7 +57,11 @@ char* nextUsefulLine(FILE* f, int* lineCount){
 
 
 ///////////////////////////////////////////////////////////////////////////////////
-///=Code parsing
+///=Generic parsing
+
+
+///////////////////////////////////////////////////////////////////////////////////
+///=C Code parsing
 
 ///~Get the function return type from C declaration
 char* get_function_return_c(char* line){
@@ -104,6 +108,7 @@ Argument* get_function_argument_c(char* line, int index){
 }
 
 
+///~Override a single argument from its argString
 void override_arg_c(Argument* a, char* argString){
 	int sep = charsUntilLast(argString, 2, ' ', '\t');
 	char* a_type = trimndup(argString, sep);
@@ -181,6 +186,8 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 
 
 
+///////////////////////////////////////////////////////////////////////////////////
+///=File reading
 
 ///~Reads a file and parse it creating all the documentation from his docstrings
 void readfile(Project* p, char* path){
@@ -224,7 +231,8 @@ void readfile(Project* p, char* path){
 
 
 
-
+///////////////////////////////////////////////////////////////////////////////////
+///=Data creation and manipulation
 
 ///~Initialize a new argument
 Argument* argument_new(char* type, char* name){
@@ -275,31 +283,31 @@ Project* project_new(char* name, char* rootFolder){
 	return p;
 }
 
-
-
+///~Add a module to a project
 void project_add_module(Project* p, Module* m){
 	p->modules[p->modules_count] = m;
 	p->modules_count++;
 }
 
-
+///~Get a module from a project or create a new one if not found
 Module* project_get_module(Project* p, char* name){
 	for (int i=0; i<p->modules_count; ++i){
 		if(strcmp(p->modules[i]->name, name) == 0){
 			return p->modules[i];
 		}
 	}
-
 	Module* newModule = module_new(name);
 	project_add_module(p, newModule);
 	return newModule;
 }
 
+///~Add a function to a module
 void module_add_function(Module* m, Function* f){
 	m->functions[m->functions_count] = f;
 	m->functions_count++;
 }
 
+///~Get a function from a module
 Function* module_get_function(Module* m, char* name){
 	for (int i=0; i<m->functions_count; ++i){
 		if(strcmp(m->functions[i]->name, name) == 0){
@@ -309,11 +317,13 @@ Function* module_get_function(Module* m, char* name){
 	return NULL;
 }
 
+///~Add a argument to a function
 void function_add_argument(Function* f, Argument* a){
 	f->args[f->args_count] = a;
 	f->args_count++;
 }
 
+///~Get an argument from a function
 Argument* function_get_argument(Function* f, char* name){
 	for (int i=0; i<f->args_count; ++i){
 		if(strcmp(f->args[i]->name, name) == 0){
