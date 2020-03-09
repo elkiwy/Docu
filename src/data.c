@@ -104,6 +104,14 @@ Argument* get_function_argument_c(char* line, int index){
 }
 
 
+void override_arg_c(Argument* a, char* argString){
+	int sep = charsUntilLast(argString, 2, ' ', '\t');
+	char* a_type = trimndup(argString, sep);
+	char* a_name = trimdup(argString + sep);
+	a->type = a_type;
+	a->name = a_name;
+}
+
 
 ///~Parse a docstring from a C file
 void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filename){
@@ -152,58 +160,23 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 	module_add_function(m, fun);
 
 	//Get arguments
-	int iii =0;
-	Argument* a = get_function_argument_c(l, iii);
+	int ind =0;
+	Argument* a = get_function_argument_c(l, ind);
 	while(a!=NULL){
+		if (override_args[ind]!=NULL){ override_arg_c(a, override_args[ind]);}
 		function_add_argument(fun, a);
-		iii++;
-		a = get_function_argument_c(l, iii);
+		ind++;
+		a = get_function_argument_c(l, ind);
 	}
 
-
-
-
-	//char* fun_args = get_function_args_c(l);
-	//int i=0;
-	//int argCount = 0;
-	//int size=strlen(fun_args);
-	//printf("fun_args: %s\n", fun_args);fflush(stdout);
-	//while(i<size && l[i] != ')' && charsUntil(fun_args, 1, ')')>0){
-	//	int step = charsUntil(fun_args, 2, ',', ')');
-	//	char* argString = trimndup(fun_args, step);
-	//	//Add the argument to the function
-	//	if (override_args[argCount]!=NULL){
-	//		printf("====OLD '%s', NEW '%s'\n", argString, override_args[argCount]);fflush(stdout);
-	//		argString = override_args[i];	
-	//	}
-
-	//	//Get argument type
-	//	int sep = charsUntilLast(argString, 2, ' ', '\t');
-	//	char* a_type = trimndup(argString, sep);
-	//	char* a_name = trimdup(argString + sep);
-	//	Argument* a = argument_new(a_type, a_name);
-	//	function_add_argument(fun, a);
-	//	argCount++;
-
-	//	if (fun_args[step]==')') break;
-	//	fun_args += step + 1;
-	//	i = 0;
-	//	size -= step;
-	//}
-
-	////Add extra argument from overriding
-	//while(override_args[argCount]!=NULL){
-	//	//Get argument type
-	//	char* argString = override_args[argCount];
-	//	int sep = charsUntilLast(argString, 2, ' ', '\t');
-	//	char* a_type = trimndup(argString, sep);
-	//	char* a_name = trimdup(argString + sep);
-	//	Argument* a = argument_new(a_type, a_name);
-	//	function_add_argument(fun, a);
-	//	argCount++;
-	//}
-
-
+	//Keep adding arguments if overriding
+	while(override_args[ind]!=NULL){
+		//Get argument type
+		a = argument_new("", "");
+		if (override_args[ind]!=NULL){ override_arg_c(a, override_args[ind]);}
+		function_add_argument(fun, a);
+		ind++;
+	}
 }
 
 
