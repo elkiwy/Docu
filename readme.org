@@ -7,6 +7,8 @@
     - ASCII renderer
     - HTML renderer
     - Custom renderer
+  - Other
+	- Add custom docstring symbol definition
   
 	
 * Sketches
