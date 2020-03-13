@@ -37,7 +37,7 @@ void getFiles(Project* proj, const char* folder){
 
 ///~Checks if the current extension is one of the supported ones
 bool checkSupportedExtension(const char* ext){
-	const char* supported[] = {".c", ".h"};
+	const char* supported[] = {".c", ".h", ".cljs", ".clj"};
 	int size = sizeof(supported) / sizeof(supported[0]);
 	for (int i=0; i<size; ++i){
 		if (strcasecmp(ext, supported[i])==0) return true;
@@ -59,20 +59,42 @@ char* nextUsefulLine(FILE* f, int* lineCount){
 ///////////////////////////////////////////////////////////////////////////////////
 ///=Generic parsing
 
+///~Checks if the first 4 symbols of line matches with the docstring with symbol
+bool checkDocstringPrefix(const char* line, const char symbol){
+	if(line==NULL){return false;}
+	if(strlen(line)<4){return false;}
+	char* prefixes[2];
+	char p1[5] = {'/', '/', '/', '0', '\0'};
+	char p2[5] = {';', ';', ';', '0', '\0'};
+	prefixes[0] = p1;
+	prefixes[1] = p2;
+	int n = sizeof(prefixes)/sizeof(prefixes[0]);
+
+	for(int i=0; i<n; ++i){
+		//Adjust prefix to check the requested symbol
+		prefixes[i][3] = symbol;
+
+		//Check if match
+		if(strncmp(line, prefixes[i], 4)==0) return true;
+	}
+	return false;
+}
+
+
 ///~Read all the docstring lines for information overriding
 char* parse_data_override(FILE* f, int* lineCount, char** name, char** ret, char* args[]){
 	char* l = nextUsefulLine(f, lineCount);
-	while(l!=NULL && strncmp(l, "///", 3)==0){
+	while(l!=NULL && (strncmp(l, "///", 3)==0 || strncmp(l, ";;;", 3)==0)){
 		//Override name
-		if (strncmp(l, "///&", 4)==0){
+		if (checkDocstringPrefix(l, '&')){
 			*name = strdup(l+4);	
 			
 		//Override return
-		}else if (strncmp(l, "///#", 4)==0){
+		}else if (checkDocstringPrefix(l, '#')){
 			*ret = strdup(l+4);	
 
 		//Override Args
-		}else if (strncmp(l, "///@", 4)==0){
+		}else if (checkDocstringPrefix(l, '@')){
 			//Convert one digit char into a number
 			if (l[4]<48 || l[4]>57){
 				printf("[!!!] Invalid argument overriding docstirng: \"%s\"", l);
@@ -193,9 +215,107 @@ void parse_docstring_c(Module* m, FILE* f, char* l, int* lineCount, char* filena
 }
 
 
+///////////////////////////////////////////////////////////////////////////////////
+///=Clojure Code parsing
+
+///~Get the function name from Clojure declaration
+char* get_function_name_clj(char* line){
+	int step = charsUntil(line, 1, '[');
+	char* lineWithoutArgs = trimndup(line, step);
+	int sep = charsUntilLast(lineWithoutArgs, 2, ' ', '\t');
+	char* name = trimdup(lineWithoutArgs + sep);
+	free(lineWithoutArgs);
+	return name;
+}
+
+
+///~Get the function argument at index from C declaration
+Argument* get_function_argument_clj(char* line, int index){
+	int step = charsUntil(line, 1, '[');
+	char* args = line + step + 1;
+	int i = 0;
+	while(i<index){
+		step = charsUntil(args, 2, ',', ' ');
+		if (step==0) return NULL;
+		args += (step + 1);
+		i++;
+	}
+
+	step = charsUntil(args, 3, ',', ' ', ']');
+	char* arg = strndup(args, step); 
+	if (strlen(arg)==0)return NULL;
+	printf("=arg '%s'\n", arg);fflush(stdout);
+	int sep = charsUntilLast(arg, 3, ',', ' ', '\t');
+	char* a_type = trimndup(arg, sep);
+	char* a_name = trimdup(arg + sep);
+	return argument_new(a_type, a_name);
+}
+
+
+///~Override a single argument from its argString
+void override_arg_clj(Argument* a, char* argString){
+	int sep = charsUntilLast(argString, 2, ' ', '\t');
+	char* a_type = trimndup(argString, sep);
+	char* a_name = trimdup(argString + sep);
+	a->type = a_type;
+	a->name = a_name;
+}
+
+
+///~Parse a docstring from a Clojure file
+void parse_docstring_clj(Module* m, FILE* f, char* l, int* lineCount, char* filename){
+	//Prepare for information overriding
+	char* override_name   = NULL;
+	char* override_return = NULL;
+	char* override_args[MAX_ARGS];
+	for (int i=0; i<MAX_ARGS; ++i){override_args[i] = NULL;}
+
+	//Parse the docstring
+	char* fun_desc = strdup(l+4); //+4 removes the prefix
+	l = parse_data_override(f, lineCount, &override_name, &override_return, override_args);
+
+	//Get return and name
+	char* fun_ret = "";
+	char* fun_name = get_function_name_clj(l);
+	printf("line: %s\n", l);fflush(stdout);
+	printf("fun_name: %s\n", fun_name);fflush(stdout);
+	if (strlen(fun_name)==0){return;}
+	if (override_name!=NULL)fun_name = override_name;
+	if (override_return!=NULL)fun_ret = override_return;
+	Function* fun = function_new(fun_name, fun_desc, fun_ret);
+	fun->line = *lineCount;
+	fun->file = strdup(filename);
+	module_add_function(m, fun);
+
+	//Get arguments
+	int ind = 0;
+	Argument* a = get_function_argument_clj(l, ind);
+	while(a!=NULL){
+		if (override_args[ind]!=NULL){ override_arg_clj(a, override_args[ind]);}
+		function_add_argument(fun, a);
+		ind++;
+		a = get_function_argument_clj(l, ind);
+	}
+
+	//Keep adding arguments if overriding
+	while(override_args[ind]!=NULL){
+		//Get argument type
+		a = argument_new("", "");
+		if (override_args[ind]!=NULL){ override_arg_clj(a, override_args[ind]);}
+		function_add_argument(fun, a);
+		ind++;
+	}
+}
+
+
+
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 ///=File reading
+
 
 ///~Reads a file and parse it creating all the documentation from his docstrings
 void readfile(Project* p, char* path){
@@ -220,14 +340,20 @@ void readfile(Project* p, char* path){
 	Module* m = project_get_module(p, "default");
 	while(l!=NULL){
 		//If is a module name
-		if(strlen(l)>3 && strncmp(l, "///=", 4)==0){
+		if(checkDocstringPrefix(l, '=')){
 			//Update the current module
 			m = project_get_module(p, l+4);
 
 		//If is a function description
-		}else if(strlen(l)>3 && strncmp(l, "///~", 4)==0){
+		}else if(checkDocstringPrefix(l, '~')){
+			//C style file
 			if(strcmp(fileExt, ".c")==0 || strcmp(fileExt, ".h")==0){
 				parse_docstring_c(m, f, l, &lineCount, filename);
+
+			//Clojue style file
+			}else if(strcmp(fileExt, ".clj")==0 || strcmp(fileExt, ".cljs")==0){
+				parse_docstring_clj(m, f, l, &lineCount, filename);
+
 			}else{
 				//Other files
 			}
