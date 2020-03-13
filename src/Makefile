@@ -9,10 +9,10 @@ objs = $(patsubst %.c,$(objdir)/%.o,$(srcs))
 
 
 main: $(objs)
-	cc -std=c99 -DDEBUG $(WARNS) $(OPTIONS) -o $@ $^
+	cc -std=c99 -D_DEFAULT_SOURCE -DDEBUG $(WARNS) $(OPTIONS) -o $@ $^
 
 $(objdir)/%.o: %.c
-	cc -std=c99 -DDEBUG $(WARNS) $(OPTIONS) -c $< -o $@
+	cc -std=c99 -D_DEFAULT_SOURCE -DDEBUG $(WARNS) $(OPTIONS) -c $< -o $@
 
 $(objdir):
 	mkdir $(objdir)
