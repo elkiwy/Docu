@@ -226,7 +226,7 @@ void readfile(Project* p, char* path){
 
 		//If is a function description
 		}else if(strlen(l)>3 && strncmp(l, "///~", 4)==0){
-			if(strcmp(fileExt, ".c") || strcmp(fileExt, ".h")){
+			if(strcmp(fileExt, ".c")==0 || strcmp(fileExt, ".h")==0){
 				parse_docstring_c(m, f, l, &lineCount, filename);
 			}else{
 				//Other files
