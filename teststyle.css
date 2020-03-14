@@ -31,3 +31,6 @@ main p { line-height:25px }
 .docu_argument_type{font-family:monospace;display: inline-block;margin:2px 0px;background-color:#eee; border-radius:2px;padding:2px;}
 .docu_argument_separator:before{content:" - ";}
 
+
+
+.docu_arg_in_desc{font-family:monospace;display:inline-block;margin:2px 0px;background-color:#eee; border-radius:2px;padding:2px;}

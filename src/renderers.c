@@ -91,11 +91,64 @@ void render_argument_html(FILE* f, Argument* a){
 	fprintf(f, "</div>");
 }
 
+bool isALimiter(char c){
+	int nc = (int)c;
+	if((nc >= 48 && nc<=57) // 0-9
+	   || (nc >= 65 && nc<=90) // A-Z
+	   || nc == 95 // _
+	   || nc == 45 // - 
+	   || (nc >= 97 && nc<=122)){ // a-z
+		return false;
+	}
+	return true;
+}
+
+
+char* highlightArguments(Function* fun){
+	char* buff = malloc(sizeof(char)*1024);
+	buff[0] = '\0';
+
+	char* desc = fun->description;
+	char* p = desc;
+	int n = 1;
+	int desc_size = strlen(desc);
+
+	//cycle all description
+	for(int i=1; i<desc_size; ++i){
+		//check for all the args name
+		for(int j=0; j<fun->args_count; ++j){
+			char* aName = fun->args[j]->name;
+			if (strncmp(desc+i, aName, strlen(aName)) == 0
+			&& isALimiter(desc[i-1]) && isALimiter(desc[i+strlen(aName)])){
+				//Found one arg, insert everything until here into buff
+				strncat(buff, p, n);
+
+				//Insert the span
+				strcat(buff, "<span class='docu_arg_in_desc'>");
+				strcat(buff, aName);
+				strcat(buff, "</span>");
+
+				i += strlen(aName);
+				p = desc + i;
+				n = 0;
+			}
+		}
+		n++;
+	}
+
+	strncat(buff, p, n);
+
+	return buff;
+}
+
+
 void render_function_html(FILE* f, Function* fun){
 	fprintf(f, "<div class='docu_function'>");
 	fprintf(f, "<span class='docu_function_return'>%s</span>", fun->returnType);
 	fprintf(f, "<span class='docu_function_name'>%s</span>", fun->name);
-	fprintf(f, "<span class='docu_function_desc'>%s</span>", fun->description);
+	char* highlightedDesc = highlightArguments(fun);
+	fprintf(f, "<span class='docu_function_desc'>%s</span>", highlightedDesc);
+	free(highlightedDesc);
 	fprintf(f, "<ul>");
 	for (int i=0; i<fun->args_count; ++i){
 		fprintf(f, "<li>");

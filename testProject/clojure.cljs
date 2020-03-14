@@ -22,3 +22,12 @@
     )
 
 
+;;;~Associate a value to a specific key inside a collection coll
+;;;#collection
+;;;@1collection coll
+;;;@2keyword/string key
+;;;@3object value
+(defn assocMap [coll key value]
+    )
+
+
