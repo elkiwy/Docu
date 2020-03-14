@@ -1,6 +1,5 @@
 
 html{--col-fg: black; --col-bg: white; --preview-img-size:96px;}
-html[data-theme='dark']{--col-fg: white; --col-bg: black;}
 
 * { margin:0;padding:0;box-sizing:border-box;text-decoration:none;color:var(--col-fg);background-color:var(--col-bg) }
 body { padding:30px } 
@@ -9,49 +8,16 @@ body > * > * { margin-bottom:12px }
 nav a:hover, ::selection { background-color:#000;color:#fff;text-decoration:none } 
 table * { vertical-align: top }
 
-header { float:left } 
-header #logo { background:none } 
 
-nav { margin:0px 0px 30px -24px } 
-nav ul { padding:0;margin-bottom:12px;display:inline-grid } 
-nav ul li { margin-left:24px; margin-bottom:4px; list-style-type:none; white-space:pre; float:left; margin-right:16px;} 
-nav ul li a:hover { background:var(--col-fg);color:var(--col-bg);padding:1px 0px;} 
-nav ul li span { background:var(--col-fg);color:var(--col-bg);padding:1px 4px; } 
-nav ul li span:before{content:"> "}
 
 main { max-width:640px;clear:both }
-main figure:first-child img { margin-left: -30px;max-width: calc(100vw - 15px);width: 900px }
 main h2 { max-width:400px } 
 main h4 { font-family:monospace } 
 main ul { margin:0px 0px 16px 30px }
 main ol { margin:0px 0px 16px 30px }
 main p { line-height:25px } 
-main .link:hover { background:var(--col-fg);color:var(--col-bg) } 
-main .link:before{ content:"{" }
-main .link:after{ content:"}" }
-main .link.external:before{ content:"[" }
-main .link.external:after{ content:"]" }
-main q { font-family:serif;font-size:18px;font-style:italic;display:block } 
-main .img2cont {text-align:center;}
-main .img3cont {text-align:center;}
-main .img1 { margin:24px auto;max-height:400px;max-width:100%;display:block;} 
-main .img2 { margin:24px auto;max-height:400px;max-width:50%;display:inline-block;padding:12px 12px 10px} 
-main .img3 { margin:24px auto;max-height:400px;max-width:33%;display:inline-block;padding:4px 4px 10px} 
 
 
-main .imgprevcont {width:var(--preview-img-size); height:var(--preview-img-size); text-align:center;float:left; margin-right: 12px}
-main .imgprev {max-width:var(--preview-img-size); max-height:var(--preview-img-size);}
-main .preview {clear:both; height: var(--preview-img-size);margin-bottom:32px;}
-
-main .imgdesc {margin-top:0px; margin-bottom:12px; text-align:center;font-style:italic; width:100%; display:inline-block}
-
-main .gallery { display:flex;flex-wrap:wrap;justify-content:center; }
-main .galleryImage{ text-align:center;max-width:50%; max-height:500px; padding:12px 12px 0px 12px; display:block; margin-bottom:0px; }
-main .galleryDesc {text-align:center; display:block; margin-top:0px; maring-bottom:12px;}
-.galleryImage a img{max-height:400px;}
-
-footer { border-top:1.5px solid;padding:30px 0 0 0;clear:both } 
-footer img { margin:0 0 -10px 0 } 
 
 
 
