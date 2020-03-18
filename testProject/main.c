@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-///~Repeat the text string n times
+///~1 Repeat the text string n times
 void testFunction(int n, char* text){
 	for(int i = 0; i<n; ++i){
 		printf("%s\n", text);
@@ -9,7 +9,7 @@ void testFunction(int n, char* text){
 
 
 
-///~This function has spaces between the docstring and declaration
+///~2 This function has spaces between the docstring and declaration
 
 	   
 		
@@ -18,16 +18,16 @@ void testFunction(int n, char* text){
 }
 
 
-     ///~this function has whitespaces before the docstring
+     ///~3 this function has whitespaces before the docstring
 void testFunctionWhitespaces(int n){
 }
 
 
-///~No arguments
+///~4 No arguments
 void testFunctionNoArgument(){
 }
 
-///~One arguments
+///~5 One arguments
 void testFunctionSingleArgument(int n){
 }
 
@@ -37,16 +37,12 @@ void testFunctionSingleArgument(int n){
 asdjaklsdjasldjsal
 
 
-///~This docstring shouldn't work
+///~6 This docstring shouldn't work
 void asdjaklsdjasldjsal(
 
 
 
-///~Test Docstring
-///&overridenName
-///#overriddenReturn
-///@1char k
-///@2char n
+///~7 Test Docstring
 void asdjaklsdjasldjsal(int n){
 }
 
