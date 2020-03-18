@@ -48,10 +48,9 @@ typedef struct Project{
 } Project;
 
 
-
-
-Project* project_new(char* name, char* rootFolder);
-Module* module_new(char* name);
+Argument* argument_new(char* type, char* name);
+Function* function_new(char* name, char* desc, char* ret);
+Project*  project_new(char* name);
 
 void project_add_module(Project* p, Module* m);
 Module* project_get_module(Project* p, char* name);

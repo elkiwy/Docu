@@ -1,0 +1,8 @@
+extensions   = 'c,h'
+functionName = '\s*(\w+)\s*\('
+returnType   = '(.*)\s+\w+\s*\('
+args         = '\((.*)\)'
+argSeparator = ','
+argType      = '(.*)\s+\w+'
+argName      = '\s+(\w+)$'
+
