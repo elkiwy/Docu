@@ -119,3 +119,33 @@ char* readline(FILE* f, int* lineCount){
 
 
 
+void regex_get(const char* src, const char* pattern, char* result){
+	//Try to compile the regex
+	regex_t regex;
+	int stat = regcomp(&regex, pattern, REG_EXTENDED);
+	if(stat != 0) {
+		char err_buf[256];
+		regerror(stat, &regex, err_buf, BUFSIZ);
+		printf("regcomp: %s\n", err_buf);
+		printf("Fail on pattern '%s\n", pattern);
+		exit(stat);
+	}
+
+	//Execute the compiled regex on the src
+	int wanted = 1;
+	regmatch_t pmatch[2];
+	stat = regexec(&regex, src, 2, pmatch, REG_NOTBOL);
+	if(stat == REG_NOMATCH) {
+		//Set the reurn to empty string
+		result[0] = '\0';
+	}else if(pmatch[wanted].rm_so != -1) {
+		//Set the result to be the match
+		int len = pmatch[wanted].rm_eo - pmatch[wanted].rm_so;
+		strncpy(result, src + pmatch[wanted].rm_so, len);
+		result[len] = '\0';
+		regfree(&regex);
+	}
+}
+
+
+

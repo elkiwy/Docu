@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <regex.h>
+
 
 #define MAX_LINE_LENGTH 256
 
@@ -18,3 +20,6 @@ char* trimdup(char* s);
 char* trimndup(char* s, int n);
 
 char* readline(FILE* f, int* lineCount);
+
+void regex_get(const char* src, const char* pattern, char* result);
+
