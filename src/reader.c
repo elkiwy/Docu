@@ -2,6 +2,7 @@
 
 
 
+///=File reader
 
 
 ///~Retrive all the files from a root directory and fill them into the project
@@ -44,8 +45,6 @@ char* nextUsefulLine(FILE* f, int* lineCount){
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////
-///=Generic parsing
 
 ///~Checks if the first 4 symbols of line matches with the docstring with symbol
 bool checkDocstringPrefix(const char* line, const char symbol){
@@ -101,8 +100,6 @@ char* parse_data_override(FILE* f, int* lineCount, char** name, char** ret, char
 
 
 
-///////////////////////////////////////////////////////////////////////////////////
-///=File reading
 
 
 ///~Reads a file and parse it creating all the documentation from his docstrings
@@ -145,16 +142,7 @@ void readfile(Project* p, Map* lang, char* path){
 }
 
 
-
-
-
-
-
-
-
-
-
-
+///~Read a whole project from its rootFolder and extract the info into the Project p.
 void read_project(char* rootFolder, Map** languages, Project* p){
 	p->root = rootFolder;
 

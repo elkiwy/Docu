@@ -1,5 +1,7 @@
 #include "languages.h"
 
+///=Languages handling
+
 
 ///~Extract the function name from a function declaration src. Outputs it into result buffer.
 void lang_get_function_name(Map* lang, const char* src, char* result){
