@@ -11,8 +11,11 @@
 
 #define KEY_EXTENSIONS		"extensions"
 #define KEY_FUNC_NAME		"functionName"
+#define KEY_FUNC_NAME_G     "functionNameGroup"
 #define KEY_FUNC_RETURN		"returnType"
+#define KEY_FUNC_RETURN_G	"returnTypeGroup"
 #define KEY_FUNC_ARGS		"args"
+#define KEY_FUNC_ARGS_G		"argsGroup"
 #define KEY_FUNC_ARG_SEP	"argSeparator"
 #define KEY_FUNC_ARG_TYPE	"argType"
 #define KEY_FUNC_ARG_NAME	"argName"

@@ -2,17 +2,27 @@
 
 ///=Languages handling
 
+int getGroupNumber(Map* m, char* key){
+	char* groupStr = map_get(m, key);
+	//printf("group number '%s' '%s'\n", groupStr, key);fflush(stdout);
+	int c = (int)groupStr[0];
+	int zero = '0';
+	return c - zero;
+}
+
 
 ///~Extract the function name from a function declaration src. Outputs it into result buffer.
 void lang_get_function_name(Map* lang, const char* src, char* result){
 	char* regex = map_get(lang, KEY_FUNC_NAME);
-	regex_get(src, regex, result);
+	int group = getGroupNumber(lang, KEY_FUNC_NAME_G);
+	regex_get(src, regex, result, group);
 }
 
 ///~Extract the function return type from a function declaration src. Outputs it into result buffer.
 void lang_get_function_returnType(Map* lang, const char* src, char* result){
 	char* regex = map_get(lang, KEY_FUNC_RETURN);
-	regex_get(src, regex, result);
+	int group = getGroupNumber(lang, KEY_FUNC_RETURN_G);
+	regex_get(src, regex, result, group);
 }
 
 ///~Extract the function args from a function declaration src. Outputs it into result struct.
@@ -22,8 +32,9 @@ void lang_get_function_args(Map* lang, const char* src, Args* result){
 
 	//Extract the arg string
 	char* regex = map_get(lang, KEY_FUNC_ARGS);
+	int group = getGroupNumber(lang, KEY_FUNC_ARGS_G);
 	char args[1024];
-	regex_get(src, regex, args);
+	regex_get(src, regex, args, group);
 
 	//Get the regex for arguments
 	char* regex_arg_name  = map_get(lang, KEY_FUNC_ARG_NAME);
@@ -45,8 +56,8 @@ void lang_get_function_args(Map* lang, const char* src, Args* result){
 			//Parse the current arg
 			char aName[256];
 			char aType[256];
-			regex_get(arg, regex_arg_name, aName);
-			regex_get(arg, regex_arg_type, aType);
+			regex_get(arg, regex_arg_name, aName, 1);
+			regex_get(arg, regex_arg_type, aType, 1);
 			if (strlen(trim(aName))>0){
 				result->types[result->count] = strdup(trim(aType));
 				result->names[result->count] = strdup(trim(aName));
@@ -172,7 +183,7 @@ Map* parse_lang_config(const char* path){
 
 	//Init the map and expected keys
 	Map* lang = map_new();
-	const char* keys[] = {KEY_EXTENSIONS, KEY_FUNC_NAME, KEY_FUNC_RETURN, KEY_FUNC_ARGS, KEY_FUNC_ARG_SEP, KEY_FUNC_ARG_NAME, KEY_FUNC_ARG_TYPE};
+	const char* keys[] = {KEY_EXTENSIONS, KEY_FUNC_NAME, KEY_FUNC_RETURN, KEY_FUNC_ARGS, KEY_FUNC_ARG_SEP, KEY_FUNC_ARG_NAME, KEY_FUNC_ARG_TYPE, KEY_FUNC_NAME_G, KEY_FUNC_RETURN_G, KEY_FUNC_ARGS_G };
 	int nkeys = sizeof(keys)/sizeof(keys[0]);
 
 	//Retrieve data from the config file

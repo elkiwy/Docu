@@ -116,32 +116,41 @@ char* readline(FILE* f, int* lineCount){
 
 
 
-
-
-
-void regex_get(const char* src, const char* pattern, char* result){
+void regex_get(const char* src, const char* pattern, char* result, int group){
 	//Try to compile the regex
 	regex_t regex;
 	int stat = regcomp(&regex, pattern, REG_EXTENDED);
 	if(stat != 0) {
 		char err_buf[256];
 		regerror(stat, &regex, err_buf, BUFSIZ);
-		printf("regcomp: %s\n", err_buf);
-		printf("Fail on pattern '%s\n", pattern);
+		printf("\n\nregcomp: %s\n", err_buf);
+		printf("Fail on pattern '%s'\n", pattern);
 		exit(stat);
 	}
 
 	//Execute the compiled regex on the src
 	int wanted = 1;
-	regmatch_t pmatch[2];
-	stat = regexec(&regex, src, 2, pmatch, REG_NOTBOL);
+	regmatch_t pmatch[16];
+
+	stat = regexec(&regex, src, 16, pmatch, REG_NOTBOL);
 	if(stat == REG_NOMATCH) {
 		//Set the reurn to empty string
 		result[0] = '\0';
-	}else if(pmatch[wanted].rm_so != -1) {
+
+	}else if(pmatch[group].rm_so != -1) {
+		//Debug print
+		for (int i=0; i<10; ++i){
+			if (pmatch[i].rm_so == -1)continue;
+			char cose[1024];
+			int len = pmatch[i].rm_eo - pmatch[i].rm_so;
+			strncpy(cose, src + pmatch[i].rm_so, len);
+			cose[len] = '\0';
+			//printf("Matches[%d]: '%s' \n", i, cose);fflush(stdout);
+		}
+
 		//Set the result to be the match
-		int len = pmatch[wanted].rm_eo - pmatch[wanted].rm_so;
-		strncpy(result, src + pmatch[wanted].rm_so, len);
+		int len = pmatch[group].rm_eo - pmatch[group].rm_so;
+		strncpy(result, src + pmatch[group].rm_so, len);
 		result[len] = '\0';
 		regfree(&regex);
 	}
