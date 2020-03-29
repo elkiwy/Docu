@@ -160,7 +160,7 @@ void render_function_html(FILE* f, Function* fun){
 }
 
 void render_module_html(FILE* f, Module* m){
-	fprintf(f, "<h2>Module: %s</h2>", m->name);
+	fprintf(f, "<h2>%s</h2>", m->name);
 	fprintf(f, "<ul>");
 	for (int i=0; i<m->functions_count; ++i){
 		fprintf(f, "<li>");
