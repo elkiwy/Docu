@@ -34,7 +34,7 @@ void lang_get_function_args(Map* lang, const char* src, Args* result){
 	//Read all the arg string and extract arguments
 	int i = 0;
 	int pos = 0;
-	char arg[256];
+	char arg[256] = "";
 	char c = ' ';
 	while(c!='\0'){
 		//Read next char
