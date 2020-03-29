@@ -51,9 +51,9 @@ markdown, html, and more.
 #+BEGIN_SRC c
 ///~"This function does not do anything!"
 ///&realFunctionName    <-    this overrides the function name
-///@1 string text       <-    this overrides read params with the provided ones
 ///#int                 <-    this overrides read return value
-///$clojure             <-    this overrides the language target
+///@1othertext          <-    this overrides name params with the provided ones, the number after the symbol specifies which argument
+///!1int                <-    this overrides type params with the provided ones, the number after the symbol specifies which argument
 void test(char* text, int n){
 #+END_SRC
 
