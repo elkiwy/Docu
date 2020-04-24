@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include "utils.h"
 
-#define MAX_FILES 128
+#define MAX_FILES 1024
 #define MAX_ARGS 16
 #define MAX_FUNCTIONS 128
 #define MAX_MODULES 128
