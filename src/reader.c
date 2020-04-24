@@ -136,7 +136,6 @@ void readfile(Project* p, Map* lang, char* path){
 			int definition = 0;
 			while(definition == 0){
 				l = nextUsefulLine(f, &lineCount);
-				printf("l: %s\n", l);
 
 				//Return type
 				if (checkDocstringPrefix(l, '#')){
@@ -167,29 +166,22 @@ void readfile(Project* p, Map* lang, char* path){
 			//Replace overrides
 			if(over_return)function->returnType = over_return;
 			if(over_name)function->name = over_name;
-			printf("Overridin\n");fflush(stdout);
 			for(int i=0;i<32;++i){
 				//Check if i have to create a new argument
 				if((over_args_name[i] != NULL || over_args_type[i] != NULL) && function->args_count <= i){
-					printf("1\n");fflush(stdout);
 					Argument* arg = argument_new(over_args_type[i], over_args_name[i]);
 					function_add_argument(function, arg);
 				//Else just override the data
 				}else{
 					if(over_args_name[i] != NULL){
-						printf("3 %s\n", over_args_name[i]);fflush(stdout);
 						function->args[i]->name = strdup(over_args_name[i]);
-						printf("3\n");fflush(stdout);
 						if(function->args_count<=i)function->args_count = i+1;
 					}
 					if(over_args_type[i] != NULL){
-						printf("4\n");fflush(stdout);
 						function->args[i]->type = strdup(over_args_type[i]);
-						printf("4\n");fflush(stdout);
 						if(function->args_count<=i)function->args_count = i+1;
 					}
 				}
-
 			}
 
 
