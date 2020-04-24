@@ -1,19 +1,5 @@
-* Todo
-  - Languages
-	- C
-	- PHP
-	- Clojure
-  - Renderers
-    - ASCII renderer
-    - HTML renderer
-    - Custom renderer
-  - Other
-	- Add custom docstring symbol definition
-  
-	
-* Sketches
-  Docu should be able to read code files and search for lines starting
-  with "~///~~" like:
+* Concept
+Docu reads code files and search for lines starting with ~///~~ like:
   
 #+BEGIN_SRC c
 ///~"This function does not do anything!"
@@ -41,8 +27,8 @@ And parse them into a data structure like this:
 }
 #+END_SRC
 
-Which should be then rendered in various formats like debug, ascii,
-markdown, html, and more.
+Which is then rendered in various formats like html, org-mode, debug
+and other in the future.
 
 ** Information overriding
    Certain docstrings can be used to override some information of the
@@ -59,17 +45,33 @@ void test(char* text, int n){
 
 
 ** Modules
-   Modules can be specified by the docstring ~"///=ModuleName"~ at the
+   Modules can be specified by the docstring ~///=ModuleName~ at the
    top of each file. If no module is specified every function read
    will be inserted into a special "default" module.
 
 #+BEGIN_SRC c
-///:ModuleName
-
-...
+///=ModuleName
 
 ///~Function description
 void test(char* text, int n){
 #+END_SRC
 
 
+
+* Features
+** Supported languages
+    Currently Docu supports only:
+      - C (both .c and .h files)
+      - Gisp
+
+    The core part that parse the code into data is driven by special
+	configuration files that defines how Docu should read the functions
+	through some regex. 
+	So adding new languages should be painless and direct.
+  
+** Renderers
+	- HTML renderer (With support for custom .css files)
+	- Debug renderer to terminal
+	- Emacs Org mode
+  
+	
