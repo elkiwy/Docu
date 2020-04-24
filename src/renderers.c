@@ -143,7 +143,7 @@ char* highlightArguments(Function* fun){
 
 
 void render_function_html(FILE* f, Function* fun){
-	fprintf(f, "<div class='docu_function'>");
+	fprintf(f, "<div id=\"%s\" class='docu_function'>", fun->name);
 	fprintf(f, "<span class='docu_function_return'>%s</span>", fun->returnType);
 	fprintf(f, "<span class='docu_function_name'>%s</span>", fun->name);
 	char* highlightedDesc = highlightArguments(fun);
@@ -160,14 +160,16 @@ void render_function_html(FILE* f, Function* fun){
 }
 
 void render_module_html(FILE* f, Module* m){
-	fprintf(f, "<h2>%s</h2>", m->name);
-	fprintf(f, "<ul>");
-	for (int i=0; i<m->functions_count; ++i){
-		fprintf(f, "<li>");
-		render_function_html(f, m->functions[i]);
-		fprintf(f, "</li>");
+	if(m->functions_count>0){
+		fprintf(f, "<li><h2 id=\"%s\">%s</h2></li>", m->name, m->name);
+		fprintf(f, "<ul>");
+		for (int i=0; i<m->functions_count; ++i){
+			fprintf(f, "<li>");
+			render_function_html(f, m->functions[i]);
+			fprintf(f, "</li>");
+		}
+		fprintf(f, "</ul>");
 	}
-	fprintf(f, "</ul>");
 }
 
 void render_css(FILE* f, const char* stylesheet){
@@ -199,10 +201,34 @@ void render_project_html(Project* p, const char* path, const char* stylesheet){
 	fputs("<main>", f);
 
 	fputs("<div class='docu_main'>", f);
-	fprintf(f, "<h1>%s API Reference</h1>", p->name);
-	for (int i=0; i<p->modules_count; ++i){
-		render_module_html(f, p->modules[i]);
-	}
+
+		//Render index
+		fputs("<div class='docu_index'>", f);
+		fputs("<h1>Index:</h2>", f);
+		fputs("<ul>", f);
+		for (int i=0; i<p->modules_count; ++i){
+			Module* m = p->modules[i];
+			if(m->functions_count>0){
+				fprintf(f, "<li><a class=\"docu_index_module\" href=\"#%s\">%s</a></li>", m->name, m->name);
+				fputs("<ul>", f);
+				for (int j=0; j<m->functions_count; ++j){
+					Function* fun = m->functions[j];
+					fprintf(f, "<li><a class=\"docu_index_func\" href=\"#%s\">%s</a></li>", fun->name, fun->name);
+				}
+				fputs("</ul>", f);
+			}
+		}
+		fputs("</ul>", f);
+		fputs("</div>", f);
+
+		//Render main body
+		fputs("<h1>Documentation:</h2>", f);
+		fputs("<ul>", f);
+		for (int i=0; i<p->modules_count; ++i){
+			render_module_html(f, p->modules[i]);
+		}
+		fputs("</ul>", f);
+
 	fputs("</div>", f);
 
 	fputs("</main>", f);
