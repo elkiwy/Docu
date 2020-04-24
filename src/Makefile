@@ -26,6 +26,9 @@ runorg: main
 rundebug: main
 	./main -i ../testProject -m DEBUG
 
+install: main
+	sudo cp main /usr/local/bin/docu
+
 clean: 
 	rm $(objs)
 
