@@ -34,6 +34,18 @@ void render_project_debug(Project* p){
 	for (int i=0; i<p->modules_count; ++i){
 		render_module_debug(p->modules[i]);
 	}
+
+
+	printf("Function names: \n");
+	for (int i=0; i<p->modules_count; ++i){
+		Module* m = p->modules[i];
+		for (int j=0; j<m->functions_count; ++j){
+			Function* fun = m->functions[j];
+			printf("%s ", fun->name);
+		}
+	}
+
+
 }
 
 
