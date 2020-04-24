@@ -177,9 +177,43 @@ int readKeyVal(FILE* f, char* key, char* val){
 	return 1;
 }
 
+
+///~Reads a couple of key and val from a linked binary obj starting from s and ending at e. Returns an offsetted s char ptr if success, NULL if nothing found.
+char* readKeyVal_linkedFile(char* s, char* e, char* key, char* val){
+	if (s==NULL || s==e){return NULL;}
+	char c = s[0];
+	int i = 0;
+	while(c!='='){
+		if (c=='\0' || s==e){return NULL;}
+		key[i] = c;
+		s++;
+		c = s[0];
+		i++;
+	}
+	key[i] = '\0';
+
+	if (c!='='){return NULL;}
+	s++;
+	c = s[0];
+
+	i = 0;
+	while(c!='\0' && c!='\n'){
+		val[i] = c;
+		s++;
+		c = s[0];
+		i++;
+	}
+	if (c=='\n'){s++;}
+	val[i] = '\0';
+	return s;
+}
+
+
+
 ///~Extract the language configuration from the file at path
-Map* parse_lang_config(const char* path){
-	printf("Parsing lang config file : '%s'\n", path);
+Map* parse_lang_config(LinkedFile* f){
+	printf("Parsing lang config file : '%s.doculang'\n", f->name);
+	printf("File content: %s\n", f->start);
 
 	//Init the map and expected keys
 	Map* lang = map_new();
@@ -187,21 +221,22 @@ Map* parse_lang_config(const char* path){
 	int nkeys = sizeof(keys)/sizeof(keys[0]);
 
 	//Retrieve data from the config file
-	FILE* f = fopen(path, "r");
-	rewind(f);
 	char keyArr[256]; char valArr[256];
 	char* key = &keyArr[0]; char* val = &valArr[0];
-	int n = readKeyVal(f, key, val);
+
+	char* filedata = f->start;
+	char* fileend  = f->end;
+	filedata = readKeyVal_linkedFile(filedata, fileend, key, val);
 	key = trim(key); val = trim(val);
 
-	while(n > 0){
+	while(filedata != NULL){
 		//Check if the key read is valid
 		bool found = false;
 		for (int i=0; i<nkeys; ++i){
 			if(strcmp(keys[i], key)==0){found = true; break;}
 		}
 		if (found==false){
-			printf("Key '%s' in file '%s' is invalid.\n", key, path);
+			printf("Key '%s' in file '%s.doculang' is invalid.\n", key, f->name);
 			exit(1);
 		}
 
@@ -211,35 +246,33 @@ Map* parse_lang_config(const char* path){
 		map_insert(lang, strdup(key), strdup(val));
 
 		//Continue the cycle
-		n = readKeyVal(f, key, val);
+		filedata = readKeyVal_linkedFile(filedata, fileend, key, val);
 		key = trim(key); val = trim(val);
 	}
-	fclose(f);
 	return lang;
 }
 
 ///~Extract all the languages configuration into the language array languagesBuffer.
 void parse_every_languages_config(Map** languagesBuffer){
-	DIR *dir;
-    struct dirent* entry;
-	const char* folder = "lang";
-    if (!(dir = opendir(folder))){
-		printf("No /lang folder!\n");	
-		exit(1);
-	}
+	int files_count = 2;
+	LinkedFile* files[files_count];
+	LinkedFile c;
+	c.start = (char*)_binary_lang_c_doculang_start;
+	c.end   = (char*)_binary_lang_c_doculang_end;
+	c.name = "c";
+	files[0] = &c;
+	LinkedFile gisp;
+	gisp.start = (char*)_binary_lang_gisp_doculang_start;
+	gisp.end   = (char*)_binary_lang_gisp_doculang_end;
+	gisp.name = "gisp";
+	files[1] = &gisp;
 
-	//While I read items
-	int i = 0;
-    while ((entry = readdir(dir)) != NULL) {
-        if (entry->d_type != DT_DIR) {
-			//Parse the config file
-			char* filename = formatString("%s/%s", 2, folder, entry->d_name);
-			languagesBuffer[i] = parse_lang_config(filename);
-			i++;
-			free(filename);
-        }
-    }
-    closedir(dir);
+	for (int i=0; i<files_count; ++i){
+		printf("COSSEE %d\n", i);
+		//Parse the config file
+		LinkedFile* f = files[i];
+		languagesBuffer[i] = parse_lang_config(f);
+	}
 }
 
 

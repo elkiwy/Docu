@@ -9,7 +9,9 @@ objs = $(patsubst %.c,$(objdir)/%.o,$(srcs))
 
 
 main: $(objs)
-	cc -std=c99 -D_DEFAULT_SOURCE -DDEBUG $(WARNS) $(OPTIONS) -o $@ $^
+	ld -r -b binary -o obj/doculang_c.o lang/c.doculang 
+	ld -r -b binary -o obj/doculang_gisp.o lang/gisp.doculang 
+	cc -std=c99 -D_DEFAULT_SOURCE -DDEBUG $(WARNS) $(OPTIONS) -o $@ $^ obj/doculang_c.o obj/doculang_gisp.o
 
 $(objdir)/%.o: %.c
 	cc -std=c99 -D_DEFAULT_SOURCE -DDEBUG $(WARNS) $(OPTIONS) -c $< -o $@

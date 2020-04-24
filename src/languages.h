@@ -20,6 +20,20 @@
 #define KEY_FUNC_ARG_TYPE	"argType"
 #define KEY_FUNC_ARG_NAME	"argName"
 
+
+
+extern const char _binary_lang_c_doculang_start[];
+extern const char _binary_lang_c_doculang_end[];
+extern const char _binary_lang_gisp_doculang_start[];
+extern const char _binary_lang_gisp_doculang_end[];
+
+
+typedef struct LinkedFile{
+	char* start;
+	char* end;
+	char* name;
+} LinkedFile;
+
 typedef struct Args{
 	char* types[32];
 	char* names[32];
