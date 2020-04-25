@@ -29,3 +29,10 @@ void map_insert(Map* m, char* key, void* value);
 
 //Retrieve from the map
 void* map_get(Map* m, char* key);
+
+//Free a map
+void map_free(Map* m);
+
+//Free a map item
+void map_item_free(MapItem* mi);
+

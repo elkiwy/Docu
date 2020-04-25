@@ -53,6 +53,12 @@ int main(int argc, char** argv){
 
 	//Read all the files
 	read_project(input, languages, p);
+	for(int i=0; i<128; ++i){
+		if(languages[i] != NULL){
+			map_free(languages[i]);
+			languages[i] = NULL;
+		}
+	}
 
 	//Render the project
 	if(strcmp(mode, "DEBUG")==0){
@@ -67,5 +73,8 @@ int main(int argc, char** argv){
 		fprintf(stderr, "Invalid mode '%s' must be one of: DEBUG, ORG, or HTML.\n", mode);
 		exit(EXIT_FAILURE);
 	}
+
+	project_free(p);
+
 	return 0;
 }

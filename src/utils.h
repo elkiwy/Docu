@@ -19,7 +19,8 @@ char* trim(char* s);
 char* trimdup(char* s);
 char* trimndup(char* s, int n);
 
-char* readline(FILE* f, int* lineCount);
+char* readline_old(FILE* f, int* lineCount);
+char* readline(char* buff, FILE* f, int* lineCount);
 
 void regex_get(const char* src, const char* pattern, char* result, int group);
 

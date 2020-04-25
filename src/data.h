@@ -52,6 +52,12 @@ Argument* argument_new(char* type, char* name);
 Function* function_new(char* name, char* desc, char* ret);
 Project*  project_new(char* name);
 
+void argument_free(Argument* a);
+void function_free(Function* f);
+void module_free(Module* m);
+void project_free(Project* p);
+
+
 void project_add_module(Project* p, Module* m);
 Module* project_get_module(Project* p, char* name);
 

@@ -92,3 +92,37 @@ Argument* function_get_argument(Function* f, char* name){
 }
 
 
+
+
+void argument_free(Argument* a){
+	free(a->name);
+	free(a->type);
+	free(a);
+}
+
+void function_free(Function* f){
+	free(f->description);
+	free(f->name);
+	free(f->returnType);
+	for(int i=0; i<f->args_count; ++i){
+		argument_free(f->args[i]);
+	}
+	free(f);
+}
+
+void module_free(Module* m){
+	for(int i=0; i<m->functions_count; ++i){
+		function_free(m->functions[i]);
+	}
+	free(m);
+}
+
+void project_free(Project* p){
+	for(int i=0; i<p->files_count; ++i){
+		free(p->files[i]);
+	}
+	for(int i=0; i<p->modules_count; ++i){
+		module_free(p->modules[i]);
+	}
+	free(p);
+}

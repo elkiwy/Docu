@@ -19,6 +19,17 @@ Map* map_new(){
     return m;
 }
 
+void map_free(Map* m){
+    for(int i=0; i<MAP_SIZE; ++i){
+		if(m->items[i] != NULL){
+			map_item_free(m->items[i]);
+		}
+    }
+	free(m->items);
+	free(m);
+}
+
+
 //Create a new item
 MapItem* map_item_new(char* key, void* value){
     MapItem* item = malloc(sizeof(MapItem));
@@ -26,6 +37,12 @@ MapItem* map_item_new(char* key, void* value){
     item->value = value;
     item->next = NULL;
     return item;
+}
+
+void map_item_free(MapItem* mi){
+	free(mi->key);
+	free(mi->value);
+	free(mi);
 }
 
 //Insert into the map

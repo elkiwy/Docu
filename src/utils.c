@@ -101,7 +101,7 @@ char* trim(char* s){
 
 
 
-char* readline(FILE* f, int* lineCount){
+char* readline_old(FILE* f, int* lineCount){
 	//Read it
 	if (feof(f)){return NULL;}
 	char* s = malloc(sizeof(char)*(MAX_LINE_LENGTH));
@@ -110,6 +110,17 @@ char* readline(FILE* f, int* lineCount){
 
 	//Trim the result and remove the newline
 	return trim(s);
+}
+
+char* readline(char* buff, FILE* f, int* lineCount){
+	//Read it
+	if(feof(f)){return NULL;}
+	for(int i=0;i<MAX_LINE_LENGTH; ++i){buff[i] = '\0';}
+	if(fgets(buff, MAX_LINE_LENGTH, f)==NULL){return NULL;}
+	if(lineCount!=NULL){*lineCount = ((*lineCount)+1);}
+
+	//Trim the result and remove the newline
+	return trim(buff);
 }
 
 
@@ -152,8 +163,8 @@ void regex_get(const char* src, const char* pattern, char* result, int group){
 		int len = pmatch[group].rm_eo - pmatch[group].rm_so;
 		strncpy(result, src + pmatch[group].rm_so, len);
 		result[len] = '\0';
-		regfree(&regex);
 	}
+	regfree(&regex);
 }
 
 

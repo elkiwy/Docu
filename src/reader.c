@@ -36,10 +36,10 @@ void getFiles(Project* proj, const char* folder){
 
 
 ///~Cycle all the next lines and skip all the blank ones
-char* nextUsefulLine(FILE* f, int* lineCount){
-	char* l = readline(f, lineCount);
+char* nextUsefulLine(char* linebuffer, FILE* f, int* lineCount){
+	char* l = readline(linebuffer, f, lineCount);
 	while(l!=NULL && strlen(trim(l))==0){
-		l = readline(f, lineCount);
+		l = readline(linebuffer, f, lineCount);
 	}
 	return l;
 }
@@ -69,8 +69,8 @@ bool checkDocstringPrefix(const char* line, const char symbol){
 
 
 ///~Read all the docstring lines for information overriding
-char* parse_data_override(FILE* f, int* lineCount, char** name, char** ret, char* args[]){
-	char* l = nextUsefulLine(f, lineCount);
+char* parse_data_override(char* linebuffer, FILE* f, int* lineCount, char** name, char** ret, char* args[]){
+	char* l = nextUsefulLine(linebuffer, f, lineCount);
 	while(l!=NULL && (strncmp(l, "///", 3)==0 || strncmp(l, ";;;", 3)==0)){
 		//Override name
 		if (checkDocstringPrefix(l, '&')){
@@ -93,7 +93,7 @@ char* parse_data_override(FILE* f, int* lineCount, char** name, char** ret, char
 		}else{
 			printf("[!] Unknown docstring : \"%s\"", l);
 		}
-		l = nextUsefulLine(f, lineCount);
+		l = nextUsefulLine(linebuffer, f, lineCount);
 	}
 	return l;
 }
@@ -116,13 +116,69 @@ void readfile(Project* p, Map* lang, char* path){
 	//Read it line by line
 	int lineCount = 0;
 	char* filename = path;// + charsUntilLast(path, 1, '/');
-	char* l = readline(f, &lineCount);
+
+	char* lbuff = malloc(sizeof(char)*(MAX_LINE_LENGTH));
+	char* l = readline(lbuff, f, &lineCount);
 	Module* m = project_get_module(p, "default");
 	while(l!=NULL){
 		//If is a module name
 		if(checkDocstringPrefix(l, '=')){
 			//Update the current module
 			m = project_get_module(p, l+4);
+
+		//If is a function description with ONLY the docstrings
+		}else if(checkDocstringPrefix(l, '+')){
+			char* description = strdup(l+4); 
+
+			//Loop through the overrides
+			char* ret = NULL;
+			char* name = NULL;
+			char* args_name[32] = {NULL};
+			char* args_type[32] = {NULL};
+			int definition = 0;
+			while(definition == 0){
+				l = nextUsefulLine(lbuff, f, &lineCount);
+
+				//Return type
+				if (checkDocstringPrefix(l, '#')){
+					ret = strdup(l+4);
+				//Name
+				}else if (checkDocstringPrefix(l, '&')){
+					name = strdup(l+4);
+				//argument name
+				}else if (checkDocstringPrefix(l, '@')){
+					int n = (int)l[4] - (int)'0' - 1;
+					args_name[n] = strdup(l+5);
+				//argument type
+				}else if (checkDocstringPrefix(l, '!')){
+					int n = (int)l[4] - (int)'0' - 1;
+					args_type[n] = strdup(l+5);
+				}else{
+					definition = 1;
+				}
+			}
+
+			printf("definition: %s\n", l);
+
+			//Fill normal data
+			Function* function = function_new(name, description, ret);
+			function->file = filename;
+			function->line = lineCount;
+
+			//Replace overrides
+			for(int i=0;i<32;++i){
+				//Check if i have to create a new argument
+				if((args_name[i] != NULL || args_type[i] != NULL)){
+					Argument* arg = argument_new(args_type[i], args_name[i]);
+					function_add_argument(function, arg);
+				}
+			}
+
+			if(strlen(function->name)>0){
+				module_add_function(m, function);
+			}else{
+				function_free(function);
+			}
 
 		//If is a function description
 		}else if(checkDocstringPrefix(l, '~')){
@@ -135,7 +191,7 @@ void readfile(Project* p, Map* lang, char* path){
 			char* over_args_type[32] = {NULL};
 			int definition = 0;
 			while(definition == 0){
-				l = nextUsefulLine(f, &lineCount);
+				l = nextUsefulLine(lbuff, f, &lineCount);
 
 				//Return type
 				if (checkDocstringPrefix(l, '#')){
@@ -164,8 +220,14 @@ void readfile(Project* p, Map* lang, char* path){
 			lang_fill_function_data(lang, l, function);
 
 			//Replace overrides
-			if(over_return)function->returnType = over_return;
-			if(over_name)function->name = over_name;
+			if(over_return){
+				free(function->returnType);
+				function->returnType = over_return;
+			}
+			if(over_name){
+				free(function->name);
+				function->name = over_name;
+			}
 			for(int i=0;i<32;++i){
 				//Check if i have to create a new argument
 				if((over_args_name[i] != NULL || over_args_type[i] != NULL) && function->args_count <= i){
@@ -187,11 +249,14 @@ void readfile(Project* p, Map* lang, char* path){
 
 			if(strlen(function->name)>0){
 				module_add_function(m, function);
+			}else{
+				function_free(function);
 			}
 		}
 
-		l = readline(f, &lineCount);
+		l = readline(lbuff, f, &lineCount);
 	}
+	free(lbuff);
 }
 
 
