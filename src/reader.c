@@ -119,7 +119,7 @@ void readfile(Project* p, Map* lang, char* path){
 
 	char* lbuff = malloc(sizeof(char)*(MAX_LINE_LENGTH));
 	char* l = readline(lbuff, f, &lineCount);
-	Module* m = project_get_module(p, "default");
+	Module* m = project_get_module(p, DEFAULT_MODULE_NAME);
 	while(l!=NULL){
 		//If is a module name
 		if(checkDocstringPrefix(l, '=')){

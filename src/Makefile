@@ -1,7 +1,7 @@
 #!make
 
 WARNS = -Wpedantic -Wshadow -Wextra -Werror=implicit-int -Werror=incompatible-pointer-types -Werror=int-conversion
-OPTIONS = -g -Og -fsanitize=address -fsanitize=undefined
+OPTIONS = -g -Og #-fsanitize=address -fsanitize=undefined
 
 objdir = obj
 srcs = $(wildcard *.c)

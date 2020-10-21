@@ -37,7 +37,7 @@ Project* project_new(char* name){
 	p->name = name;
 	p->files_count = 0;
 	p->modules_count = 0;
-	project_add_module(p, module_new(DEFAULT_MODULE_NAME));
+	project_add_module(p, module_new(strdup(DEFAULT_MODULE_NAME)));
 	return p;
 }
 
@@ -54,7 +54,7 @@ Module* project_get_module(Project* p, char* name){
 			return p->modules[i];
 		}
 	}
-	Module* newModule = module_new(name);
+	Module* newModule = module_new(strdup(name));
 	project_add_module(p, newModule);
 	return newModule;
 }
@@ -111,6 +111,7 @@ void function_free(Function* f){
 }
 
 void module_free(Module* m){
+	free(m->name);
 	for(int i=0; i<m->functions_count; ++i){
 		function_free(m->functions[i]);
 	}
