@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang='en'><head><style>
+html{--col-fg: black; --col-bg: white; --preview-img-size:96px;}
+
+* { margin:0;padding:0;box-sizing:border-box;text-decoration:none;color:var(--col-fg);background-color:var(--col-bg) }
+body { padding:30px } 
+body > * { margin-bottom:12px }
+body > * > * { margin-bottom:12px }
+nav a:hover, ::selection { background-color:#000;color:#fff;text-decoration:none } 
+table * { vertical-align: top }
+
+
+
+main { max-width:640px;clear:both }
+main h2 { max-width:100% } 
+main h4 { font-family:monospace } 
+main ul { margin:0px 0px 16px 30px }
+main ol { margin:0px 0px 16px 30px }
+main p { line-height:25px } 
+
+
+
+
+
+
+
+
+
+.docu_function_name{font-family:monospace;margin-left:8px;font-weight:bold;}
+.docu_function_desc{display:block;margin-bottom:0px;}
+.docu_function_return{font-family:monospace;display: inline-block;margin:2px 0px;background-color:#eee; border-radius:2px;padding:2px;}
+.docu_argument_type{font-family:monospace;display: inline-block;margin:2px 0px;background-color:#eee; border-radius:2px;padding:2px;}
+.docu_argument_separator:before{content:" - ";}
+
+
+
+.docu_arg_in_desc{font-family:monospace;display:inline-block;margin:2px 0px;background-color:#eee; border-radius:2px;padding:2px;}
+</style></head><body><main><div class='docu_main'><div class='docu_index'><h1>Index:</h2><ul><li><a class="docu_index_module" href="#default">default</a></li><ul><li><a class="docu_index_func" href="#testFunction">testFunction</a></li><li><a class="docu_index_func" href="#testFunction">testFunction</a></li><li><a class="docu_index_func" href="#testFunctionWhitespaces">testFunctionWhitespaces</a></li><li><a class="docu_index_func" href="#testFunctionNoArgument">testFunctionNoArgument</a></li><li><a class="docu_index_func" href="#testFunctionSingleArgument">testFunctionSingleArgument</a></li><li><a class="docu_index_func" href="#asdjaklsdjasldjsal">asdjaklsdjasldjsal</a></li><li><a class="docu_index_func" href="#testFunction_inUtils1">testFunction_inUtils1</a></li></ul><li><a class="docu_index_module" href="#"></a></li><ul><li><a class="docu_index_func" href="#testFunction_inUtils2">testFunction_inUtils2</a></li><li><a class="docu_index_func" href="#testFunctionWithConst">testFunctionWithConst</a></li></ul></ul></div><h1>Documentation:</h2><ul><li><h2 id="default">default</h2></li><ul><li><div id="testFunction" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>testFunction</span><span class='docu_function_desc'>1 Repeat the <span class='docu_arg_in_desc'>text</span> string <span class='docu_arg_in_desc'>n</span> times</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>int</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li><li><div class='docu_argument'><span class='docu_argument_type'>char*</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>text</span></div></li></ul></div></li><li><div id="testFunction" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>testFunction</span><span class='docu_function_desc'>2 This function has spaces between the docstring and declaration</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>int</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li><li><div class='docu_argument'><span class='docu_argument_type'>char*</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>text</span></div></li></ul></div></li><li><div id="testFunctionWhitespaces" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>testFunctionWhitespaces</span><span class='docu_function_desc'>3 this function has whitespaces before the docstring</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>int</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li></ul></div></li><li><div id="testFunctionNoArgument" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>testFunctionNoArgument</span><span class='docu_function_desc'>4 No arguments</span><ul></ul></div></li><li><div id="testFunctionSingleArgument" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>testFunctionSingleArgument</span><span class='docu_function_desc'>5 One arguments</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>int</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li></ul></div></li><li><div id="asdjaklsdjasldjsal" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>asdjaklsdjasldjsal</span><span class='docu_function_desc'>7 Test Docstring</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>int</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li></ul></div></li><li><div id="testFunction_inUtils1" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>testFunction_inUtils1</span><span class='docu_function_desc'>Repeat the <span class='docu_arg_in_desc'>text</span> string <span class='docu_arg_in_desc'>n</span> times</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>int</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li><li><div class='docu_argument'><span class='docu_argument_type'>char*</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>text</span></div></li></ul></div></li></ul><li><h2 id=""></h2></li><ul><li><div id="testFunction_inUtils2" class='docu_function'><span class='docu_function_return'>void</span><span class='docu_function_name'>testFunction_inUtils2</span><span class='docu_function_desc'>This function is broken</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>void**</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li><li><div class='docu_argument'><span class='docu_argument_type'>const char*</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>text</span></div></li></ul></div></li><li><div id="testFunctionWithConst" class='docu_function'><span class='docu_function_return'>const char*</span><span class='docu_function_name'>testFunctionWithConst</span><span class='docu_function_desc'>This function is broken</span><ul><li><div class='docu_argument'><span class='docu_argument_type'>void**</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>n</span></div></li><li><div class='docu_argument'><span class='docu_argument_type'>const char*</span><span class='docu_argument_separator'></span><span class='docu_argument_name'>text</span></div></li></ul></div></li></ul></ul></div></main></body></html>
